@@ -132,3 +132,7 @@ export const signOutAction = async () => {
   await supabase.auth.signOut();
   return redirect("/sign-in");
 };
+
+export const postAction = async (formData:FormData) => {
+  console.log("post submitted; title:"+formData.get("title")?.toString())
+}
