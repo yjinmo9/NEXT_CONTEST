@@ -133,6 +133,27 @@ export const signOutAction = async () => {
   return redirect("/sign-in");
 };
 
-export const postAction = async (formData:FormData) => {
-  console.log("post submitted; title:"+formData.get("title")?.toString())
-}
+// ❗ 반환 타입을 명시적으로 Promise<void>로 설정
+export const postAction = async (formData: FormData): Promise<void> => {
+  const title = formData.get("title")?.toString();
+  const content = formData.get("content")?.toString();
+
+  if (!title || !content) {
+    console.error("제목과 내용은 필수입니다.");
+    throw new Error("제목과 내용은 필수입니다."); // ❗ throw 사용
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("reports")
+    .insert([{ title, content }]);
+
+  if (error) {
+    console.error("데이터 삽입 오류:", error.message);
+    throw new Error(error.message); // ❗ throw 사용
+  }
+
+  console.log("Report created successfully:", data);
+  // ✅ 성공 시 아무 것도 반환하지 않음 (void)
+};
