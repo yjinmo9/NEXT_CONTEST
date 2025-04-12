@@ -134,5 +134,10 @@ export const signOutAction = async () => {
 };
 
 export const postAction = async (formData:FormData) => {
-  console.log("post submitted; title:"+formData.get("title")?.toString())
+  console.log("[post submitted]\ntitle:"+formData.get("title")?.toString()+"\ncontent:"+formData.get("content")?.toString())
+}
+
+export const getNewListAction = async () => {
+  let newsList = [{id:1, title:'안녕', content:'반가워', created_at:'오늘'}, {id:2, title:'연현중', content:'양진모', created_at:'어제'}]
+  return newsList
 }
