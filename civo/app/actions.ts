@@ -133,7 +133,6 @@ export const signOutAction = async () => {
   return redirect("/sign-in");
 };
 
-// ❗ 반환 타입을 명시적으로 Promise<void>로 설정
 export const postAction = async (formData: FormData): Promise<void> => {
   const title = formData.get("title")?.toString();
   const content = formData.get("content")?.toString();
@@ -157,3 +156,9 @@ export const postAction = async (formData: FormData): Promise<void> => {
   console.log("Report created successfully:", data);
   // ✅ 성공 시 아무 것도 반환하지 않음 (void)
 };
+
+export const getNewListAction = async () => {
+  let newsList = [{id:1, title:'안녕', content:'반가워', created_at:'오늘'}, {id:2, title:'연현중', content:'양진모', created_at:'어제'}]
+  return newsList
+}
+
