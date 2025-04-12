@@ -1,4 +1,5 @@
-"use client"
+// ReportInput.tsx
+"use client";
 
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
