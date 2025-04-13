@@ -158,7 +158,18 @@ export const postAction = async (formData: FormData): Promise<void> => {
 };
 
 export const getNewListAction = async () => {
-  let newsList = [{id:1, title:'안녕', content:'반가워', created_at:'오늘'}, {id:2, title:'연현중', content:'양진모', created_at:'어제'}]
-  return newsList
-}
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("뉴스 리스트 에러:", error.message);
+    return [];
+  }
+
+  return data;
+};
 
