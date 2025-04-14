@@ -4,8 +4,8 @@ import { cookies } from "next/headers";
 export const createClient = async () => {
   const cookieStore = cookies(); // get cookie context
 
-  const url = "https://fionhhnbcfygydxzuoqw.supabase.co";
-  const key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpb25oaG5iY2Z5Z3lkeHp1b3F3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMxNTM3MTksImV4cCI6MjA1ODcyOTcxOX0.Vjx8nadNRDxph8YaNFtgbmcvoVk-UP6ymqouEKBuyuA";
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   // 환경변수가 설정되지 않았을 경우 에러 발생
   if (!url || !key) {
