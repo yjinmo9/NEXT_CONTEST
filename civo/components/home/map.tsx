@@ -32,7 +32,7 @@ export default function Map({ loc }: { loc: Coordinates }) {
       <Script
         strategy="afterInteractive"
         type="text/javascript"
-        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${process.env.NEXT_PUBLIC_MAP_CLIENT_ID}`}
+        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.NEXT_PUBLIC_MAP_CLIENT_ID}`}
         onReady={initializeMap}
       ></Script>
       <div id={mapId} style={{ width: "512px", height: "512px" }} />
