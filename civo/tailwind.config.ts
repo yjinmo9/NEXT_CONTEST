@@ -22,6 +22,8 @@ const config = {
         writer: "rgba(179, 179, 179, 1)",
         date: "rgba(147, 147, 147, 1)",
         line: "rgba(230, 230, 230, 1)",
+        description: "rgba(153, 153, 153, 1)",
+        formborder: "rgba(217, 217, 217, 1)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
