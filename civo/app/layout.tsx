@@ -39,7 +39,7 @@ export default function RootLayout({
       <body className="max-w-[420px] w-full h-full min-h-screen mx-auto overflow-hidden flex flex-col min-h-screen">
       <div className="fixed inset-0 z-0"> <Navermap /> </div>
       <Header />
-      <main className="relative z-10 overflow-y-auto flex-grow pointer-events-none">{children}</main>
+      <main className="relative z-10 flex-grow pointer-events-none min-h-screen">{children}</main>
       <Footer/>
       </body>
     </html>
