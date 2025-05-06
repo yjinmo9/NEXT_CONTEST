@@ -134,6 +134,11 @@ export const signOutAction = async () => {
 };
 
 export const postAction = async (formData: FormData): Promise<void> => {
+
+  Array.from(formData.entries()).forEach(([key, value]) => {
+    console.log(key, value);
+  });
+  /*
   const title = formData.get("title")?.toString();
   const content = formData.get("content")?.toString();
 
@@ -155,6 +160,9 @@ export const postAction = async (formData: FormData): Promise<void> => {
 
   console.log("Report created successfully:", data);
   // ✅ 성공 시 아무 것도 반환하지 않음 (void)
+  */
+
+  redirect('/report/done')
 };
 
 export const getNewListAction = async () => {
