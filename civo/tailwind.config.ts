@@ -19,6 +19,9 @@ const config = {
     },
     extend: {
       colors: {
+        writer: "rgba(179, 179, 179, 1)",
+        date: "rgba(147, 147, 147, 1)",
+        line: "rgba(230, 230, 230, 1)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -72,6 +75,17 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      fontFamily: {
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          'sans-serif',
+        ]
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],
