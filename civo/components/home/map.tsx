@@ -56,11 +56,10 @@ export default function Map({ loc, onReady, enableRecenterButton = false }: {
       ></Script>
       <div id={mapId} style={{ width: "100%", height: "100%" }} />
       {enableRecenterButton && (
-        <button type="button" onClick={recenter}>
+        <button type="button" onClick={recenter} className="fixed inset-0 mt-[156px] ml-[341px]">
           <Image
             src={Located}
             alt="현위치"
-            className="fixed inset-0 mt-[156px] ml-[341px]"
             width={40}
             height={40}
           /></button>
