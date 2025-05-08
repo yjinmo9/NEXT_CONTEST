@@ -4,6 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { fetchGoogleNewsAll } from "@/lib/newsCrawler";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -166,6 +167,8 @@ export const postAction = async (formData: FormData): Promise<void> => {
 };
 
 export const getNewListAction = async () => {
+  const data = await fetchGoogleNewsAll()
+/*
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -177,7 +180,7 @@ export const getNewListAction = async () => {
     console.error("뉴스 리스트 에러:", error.message);
     return [];
   }
-
+*/
   return data;
 };
 

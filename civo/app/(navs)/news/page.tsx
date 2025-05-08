@@ -1,12 +1,15 @@
 import { NewsList } from "@/components/news/news-list"
 import { getNewListAction } from "@/app/actions"
 
-type News = {
-    id : number
-    title : string
-    content : string
-    created_at : string
-}
+export type News = {
+    id: number;
+    title: string;
+    press: string;
+    url: string;
+    created_at: string;
+    image: string;
+  };
+  
 
 export default async function NewsPage() {
     const newsList:News[] = await getNewListAction();

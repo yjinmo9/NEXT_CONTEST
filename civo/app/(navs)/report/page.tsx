@@ -16,7 +16,7 @@ export default function ReportPage() {
             
             <div id="list" className="flex-grow min-h-0 overflow-y-auto flex flex-col gap-[10px]">
             <Link href="/report/incident" scroll={true} className="relative mt-[10px] h-[235px] px-[18px] py-[11px] w-full text-right text-white">
-                <Image src={Report01} layout="fill" alt="사고 제보" objectFit="cover" className="rounded-[10px]"/>
+                <Image src={Report01} fill alt="사고 제보" className="rounded-[10px] object-cover"/>
                 <div className="absolute bottom-3 right-3 text-right z-10">
                     <p className="font-semibold text-[15px]">사고 제보</p>
                     <p className="text-[10px]">교통사고 · 화재 · 인구 밀집</p>
@@ -24,7 +24,7 @@ export default function ReportPage() {
                 <div className="absolute inset-0 bg-black bg-opacity-20 z-0 rounded-[10px]" />
             </Link>
             <Link href="/report/damage/1" scroll={true}className="relative h-[140px] px-[18px] py-[11px] w-full text-right text-white">
-                <Image src={Report02} layout="fill" alt="기물파손 제보" objectFit="cover" className="rounded-[10px]"/>
+                <Image src={Report02} fill alt="기물파손 제보" className="rounded-[10px] object-cover"/>
                 <div className="absolute bottom-3 right-3 text-right z-10">
                     <p className="font-semibold text-[15px]">기물 파손 제보</p>
                     <p className="text-[10px]">도로시설물 파손안전 · 위험물 등</p>
@@ -32,7 +32,7 @@ export default function ReportPage() {
                 <div className="absolute inset-0 bg-black bg-opacity-20 z-0 rounded-[10px]" />
             </Link>
             <Link href="/report/missing/1" className="relative h-[140px] px-[18px] py-[11px] w-full text-right text-white">
-                <Image src={Report03} layout="fill" alt="기물파손 제보" objectFit="cover" className="rounded-[10px]"/>
+                <Image src={Report03} fill alt="기물파손 제보" className="rounded-[10px] object-cover"/>
                 <div className="absolute bottom-3 right-3 text-right z-10">
                     <p className="font-semibold text-[15px]">실종 제보</p>
                     <p className="text-[10px]">노약자 실종신고 · 반려동물 실종</p>
