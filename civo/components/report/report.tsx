@@ -12,10 +12,10 @@ import { useRouter } from "next/navigation";
 import { useDamageForm } from "@/app/context/DamageFormContext";
 import { useMissingForm } from "@/app/context/MissingFormContext";
 import AutoLocationFetcher from "@/components/report/AutoLocationFetcher";
-import Navermap from "../home/navermap";
 import { Coordinates } from '@/components/home/map';
 import searchGlyphImg from '@/src/img/Search Glyph.png';
 import MapWithMarker from "./MapwithMarker";
+import LocateSelector from "./LocateSelector";
 
 export function IncidentInput() {
     const categories = ['화재', '인구밀집', '교통사고', '기타'];
@@ -362,7 +362,7 @@ export function DamageInput1() {
     const router = useRouter();
     const { data, setData } = useDamageForm();
     const isValid = data.title.trim() !== '' && data.content.trim() !== '';
-
+    const [locate, setlocate] = useState<string|null>("")
     return (
         <form className="flex-1 flex flex-col min-w-64 h-full pointer-events-auto" encType="multipart/form-data">
             <div className="mt-[5px] flex-grow overflow-y-auto min-h-0 flex flex-col gap-[32px]">
@@ -370,6 +370,7 @@ export function DamageInput1() {
                     <Label htmlFor="title" className="font-semibold text-[15px]">파손신고 제목 <span className="text-red-700">*</span></Label>
                     <Input name="title" placeholder="파손신고 제목을 입력해주세요" className="mt-[12px] h-[52px] border rounded-[10px] border-formborder placeholder-description" onChange={(e) => setData({ title: e.target.value })} required />
                 </div>
+                <LocateSelector onLocateChange={setlocate}/>
                 <div id="파손 내용" className="flex flex-col">
                     <Label htmlFor="content" className="font-semibold text-[15px]">파손 내용 <span className="text-red-700">*</span></Label>
                     <TextareaAutosize className="mt-[12px] min-h-[calc(100vh-600px)] py-[10px] px-[15px] border rounded-[10px] border-formborder placeholder-description" name="content" placeholder="파손 내용을 작성해주세요" onChange={(e) => setData({ content: e.target.value })} required />
