@@ -11,6 +11,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useDamageForm } from "@/app/context/DamageFormContext";
 import { useMissingForm } from "@/app/context/MissingFormContext";
+import AutoLocationFetcher from "@/components/report/AutoLocationFetcher";
 
 
 export function IncidentInput() {
@@ -30,6 +31,8 @@ export function IncidentInput() {
             setPreview(URL.createObjectURL(selected));
         }
     };
+
+    const [locate, setLocate] = useState<string | null>(null);
 
     return (
         <form className="pb-[100px] flex-1 flex flex-col min-w-64 h-full pointer-events-auto" encType="multipart/form-data">
@@ -56,6 +59,20 @@ export function IncidentInput() {
                 {selected && (
                     <input type="hidden" name="category" value={selected} />
                 )}
+                <div id="사고 위치">
+                    <Label htmlFor="locate" className="font-semibold text-[15px]">사고 위치 <span className="text-red-700">*</span></Label>
+                    <div className="py-[8px] mt-[12px] border rounded-[10px] border-formborder text-description flex flex-col justify-center px-4 gap-[10px]">
+                        <span>{locate?locate:<AutoLocationFetcher />}</span>
+                        <button
+                            type="button"
+                            className="text-[15px] text-gray-500 border border-gray-500 border-[0.8px] rounded-[10px] px-3 py-[2px] w-[155px] h-[30px]"
+                        >
+                            이 위치가 아닌가요?
+                        </button>
+
+                    </div>
+
+                </div>
                 <div id="신고 제목">
                     <Label htmlFor="title" className="font-semibold text-[15px]">신고 제목 <span className="text-red-700">*</span></Label>
                     <Input name="title" placeholder="신고 제목을 입력해주세요" className="mt-[12px] h-[52px] border rounded-[10px] border-formborder placeholder-description" required />
@@ -289,8 +306,8 @@ export function MissingInput1() {
                     disabled={!isValid}
                     onClick={() => router.push("/report/missing/2")}
                     className={`h-[53px] rounded-[10px] w-full text-sm font-semibold transition ${isValid
-                            ? "bg-black text-white"
-                            : "bg-gray-300 text-black cursor-not-allowed"
+                        ? "bg-black text-white"
+                        : "bg-gray-300 text-black cursor-not-allowed"
                         }`}
                 >
                     다음
