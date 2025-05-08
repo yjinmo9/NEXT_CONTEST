@@ -198,3 +198,30 @@ export const getNewListAction = async () => {
   }));
 };
 
+
+export const getMyReportsAction = async () => {
+  const dummyReports = [
+    {
+      id: 1,
+      title: "전장연, 혜화역 승강장 시위하다 강제퇴거... 서울 연속",
+      created_at: "2025.04.26",
+      image: null,
+      status: 'pending' as const
+    },
+    {
+      id: 2,
+      title: "전장연, 혜화역 승강장 시위하다 강제퇴거... 서울 연속",
+      created_at: "2025.04.26",
+      image: null,
+      status: 'completed' as const
+    },
+    {
+      id: 3,
+      title: "전장연, 혜화역 승강장 시위하다 강제퇴거... 서울 연속",
+      created_at: "2025.04.26",
+      image: null,
+      status: 'pending' as const
+    }
+  ];
+};
+

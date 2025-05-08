@@ -56,7 +56,7 @@ export function formatRelativeTimeKST(dateString: string): string {
 export async function fetchAndStoreNews(): Promise<void> {
   try {
     const supabase = await createClient();
-    let allNewsItems = [];
+    let allNewsItems: string | any[] = [];
 
     // 각 RSS URL에서 뉴스 수집
     for (const url of RSS_URLS) {

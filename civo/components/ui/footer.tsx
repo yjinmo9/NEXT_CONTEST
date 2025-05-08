@@ -29,7 +29,7 @@ export default function Footer() {
           <Image src={pathname.startsWith('/report')?ReportSelected:Report} alt="보고" width={21} height={19} />
           <span className="text-[10px]">Report</span>
         </Link>
-        <Link className={`flex flex-1 flex-col items-center justify-center gap-[3px] ${pathname.startsWith('/my') ? 'text-black' : 'text-gray-400'}`} href={'/me'}>
+        <Link className={`flex flex-1 flex-col items-center justify-center gap-[3px] ${pathname.startsWith('/my') ? 'text-black' : 'text-gray-400'}`} href={'/my'}>
           <Image src={pathname.startsWith('/my')?MypageSelected:Mypage} alt="내 정보" width={21} height={19} />
           <span className="text-[10px]">My</span>
         </Link>
