@@ -6,13 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import TextareaAutosize from "react-textarea-autosize"
 import { postAction } from "@/app/actions";
-import { useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useDamageForm } from "@/app/context/DamageFormContext";
 import { useMissingForm } from "@/app/context/MissingFormContext";
 import AutoLocationFetcher from "@/components/report/AutoLocationFetcher";
-
+import Navermap from "../home/navermap";
+import { Coordinates } from '@/components/home/map';
+import searchGlyphImg from '@/src/img/Search Glyph.png';
+import MapWithMarker from "./MapwithMarker";
 
 export function IncidentInput() {
     const categories = ['화재', '인구밀집', '교통사고', '기타'];
@@ -32,12 +35,69 @@ export function IncidentInput() {
         }
     };
 
-    const [locate, setLocate] = useState<string | null>(null);
+    const [locate, setLocate] = useState<string | null>('');
 
+    const [locateChoice, setLocateChoice] = useState<boolean>(false);
+
+    const [selectedLocation, setSelectedLocation] = useState<Coordinates | null>(null);
+
+    const [loc, setLoc] = useState<Coordinates>();
+
+    const initLocation = () => {
+        navigator.geolocation.getCurrentPosition((position) => {
+            setLoc([position.coords.longitude, position.coords.latitude]);
+        });
+    };
+
+    useEffect(() => {
+        initLocation();
+    }, []);
+
+    const handleLocationConfirm = async () => {
+        console.log(selectedLocation)
+        if (!selectedLocation) return;
+
+        const res = await fetch(
+            `/api/location?lat=${selectedLocation[0]}&lon=${selectedLocation[1]}`
+        );
+        const data = await res.json();
+
+        const roadAddr = data.results?.find((r: any) => r.name === 'roadaddr');
+        const fullAddr = [
+            roadAddr?.region?.area1?.name,
+            roadAddr?.region?.area2?.name,
+            roadAddr?.land?.name,
+            roadAddr?.land?.number1,
+        ]
+            .filter(Boolean)
+            .join(' ');
+
+        setLocate(fullAddr);
+        setLocateChoice(false);
+    }
     return (
         <form className="pb-[100px] flex-1 flex flex-col min-w-64 h-full pointer-events-auto" encType="multipart/form-data">
+            {locateChoice && loc && (
+                <div className="relative w-full h-screen overflow-hidden px-[20px] z-20">
+                    <div className="fixed inset-0 z-0">
+                        <MapWithMarker
+                            loc={loc}
+                            onCenterChange={setSelectedLocation}
+                            onConfirm={handleLocationConfirm}
+                        />
+                    </div>
+                    <div
+                        id="searchfield"
+                        className="fixed inset-0 mt-[108px] mx-[10px] pt-[8px] pb-[7px] pl-[8px] pr-[8px] h-[36px] z-20 bg-white rounded-[10px] drop-shadow-[0_2px_6px_rgba(0,0,0,0.15)] flex gap-[8px] pointer-events-auto"
+                    >
+                        <Image src={searchGlyphImg} alt="돋보기" width={21} height={19} />
+                        <input placeholder="지역/사건 검색하기" className="w-full text-[13px]" />
+                    </div>
+                </div>
+            )}
+
             <div className="mt-[5px] flex-grow overflow-y-auto min-h-0 flex flex-col gap-[32px]">
-                <input type="hidden" name="type" value="incident" /> {/* type 필드 추가 */}
+                <input type="hidden" name="type" value="incident" />
                 <div id="사고유형">
                     <Label htmlFor="category" className="font-semibold text-[15px]">사고 유형 <span className="text-red-700">*</span></Label>
                     <div className="mt-[12px] h-[30px] flex flex-wrap gap-2">
@@ -62,15 +122,19 @@ export function IncidentInput() {
                 )}
                 <div id="사고 위치">
                     <Label htmlFor="locate" className="font-semibold text-[15px]">사고 위치 <span className="text-red-700">*</span></Label>
-                    <div className="py-[8px] mt-[12px] border rounded-[10px] border-formborder text-description flex flex-col justify-center px-4 gap-[10px]">
-                        <span>{locate?locate:<AutoLocationFetcher />}</span>
+                    <div className={`py-[8px] mt-[12px] border rounded-[10px] border-formborder flex flex-col justify-center px-4 gap-[10px] ${locate?"text-black":"text-description"}`}>
+                        {locate ? (
+                            <span>{locate}</span>
+                        ) : (
+                            <AutoLocationFetcher />
+                        )}
                         <button
                             type="button"
                             className="text-[15px] text-gray-500 border border-gray-500 border-[0.8px] rounded-[10px] px-3 py-[2px] w-[155px] h-[30px]"
+                            onClick={() => setLocateChoice(true)}
                         >
                             이 위치가 아닌가요?
                         </button>
-
                     </div>
 
                 </div>
@@ -200,11 +264,10 @@ export function MissingInput1() {
                     type="button"
                     disabled={!isValid}
                     onClick={() => router.push("/report/missing/2")}
-                    className={`h-[53px] rounded-[10px] w-full text-sm font-semibold transition ${
-                        isValid
-                            ? "bg-black text-white"
-                            : "bg-gray-300 text-black cursor-not-allowed"
-                    }`}
+                    className={`h-[53px] rounded-[10px] w-full text-sm font-semibold transition ${isValid
+                        ? "bg-black text-white"
+                        : "bg-gray-300 text-black cursor-not-allowed"
+                        }`}
                 >
                     다음
                 </button>
@@ -283,9 +346,9 @@ export function MissingInput2() {
                     </div>
                 </div>
 
-                <SubmitButton 
-                    formAction={postAction} 
-                    pendingText="제출 중..." 
+                <SubmitButton
+                    formAction={postAction}
+                    pendingText="제출 중..."
                     className="h-[53px] bg-black text-white rounded-[10px]"
                 >
                     신고하기

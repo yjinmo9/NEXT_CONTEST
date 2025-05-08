@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Coordinates } from '../home/map';
 
 export default function AutoLocationFetcher() {
   const [address, setAddress] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [location, setLocation] = useState<Coordinates | null>(null);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -15,6 +17,7 @@ export default function AutoLocationFetcher() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
+        setLocation([latitude, longitude])
 
         try {
           const res = await fetch(`/api/location?lat=${latitude}&lon=${longitude}`);
