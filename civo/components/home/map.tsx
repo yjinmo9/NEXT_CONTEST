@@ -9,8 +9,9 @@ import Script from "next/script";
 import { useCallback, useRef } from "react";
  
 const mapId = "naver-map";
+const DEFAULT_COORDINATES: Coordinates = [126.9784147, 37.5666805];
 
-export default function Map({ loc }: { loc: Coordinates }) {
+export default function Map({ loc = DEFAULT_COORDINATES }: { loc?: Coordinates })  {
   const mapRef = useRef<NaverMap>(null);
  
   const initializeMap = useCallback(() => {

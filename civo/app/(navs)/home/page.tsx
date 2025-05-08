@@ -1,8 +1,12 @@
-import searchGlyphImg from '@/src/img/Search Glyph.png';
+'use client'
+
 import Image from 'next/image';
 import Navermap from "@/components/home/navermap";
+import { useState } from 'react';
+import searchGlyphImg from '@/src/img/Search Glyph.png';
 
 export default function HomePage() {
+    const [showNotifications, setShowNotifications] = useState(false);
 
     return(
         <div className='relative w-full h-screen overflow-hidden px-[20px] z-20'> 
@@ -11,6 +15,7 @@ export default function HomePage() {
                 <Image src={searchGlyphImg} alt="돋보기" width={21} height={19}/>
                 <input placeholder='지역/사건 검색하기' className='w-full text-[13px]'/>
             </div>
+
         </div>
     )
 }
