@@ -4,7 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { fetchGoogleNewsAll } from "@/lib/newsCrawler";
+import { fetchAndStoreNews,formatRelativeTimeKST } from "@/lib/newsCrawler";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -179,20 +179,22 @@ export const postAction = async (formData: FormData): Promise<void> => {
 };
 
 export const getNewListAction = async () => {
-  const data = await fetchGoogleNewsAll()
-/*
+  await fetchAndStoreNews(); // 새로운 뉴스 데이터 가져와서 저장
+  
   const supabase = await createClient();
-
   const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .from('news')
+    .select('*')
+    .order('created_at', { ascending: false });
 
   if (error) {
-    console.error("뉴스 리스트 에러:", error.message);
+    console.error('뉴스 조회 에러:', error);
     return [];
   }
-*/
-  return data;
+
+  return data.map(item => ({
+    ...item,
+    created_at: formatRelativeTimeKST(item.created_at)
+  }));
 };
 

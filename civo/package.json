@@ -26,7 +26,8 @@
     "puppeteer": "^24.8.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-textarea-autosize": "^8.5.9"
+    "react-textarea-autosize": "^8.5.9",
+    "rss-parser": "^3.13.0"
   },
   "devDependencies": {
     "@types/navermaps": "^3.7.9",
