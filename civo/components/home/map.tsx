@@ -11,6 +11,7 @@ import Located from "@/src/img/located.png"
 import Image from "next/image";
 
 const mapId = "naver-map";
+const DEFAULT_COORDINATES: Coordinates = [126.9784147, 37.5666805];
 
 export default function Map({ loc, onReady, enableRecenterButton = false }: {
   loc: Coordinates, onReady?: (map: naver.maps.Map) => void, enableRecenterButton?: boolean

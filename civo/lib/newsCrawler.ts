@@ -11,7 +11,14 @@ export type News = {
   keyword: string;
 };
 
-const YNA_RSS_URL = 'https://www.yna.co.kr/rss/society.xml';
+// ✅ RSS 주소와 키워드 설정
+const RSS_URLS = [
+  'https://www.yna.co.kr/rss/news.xml',
+  'https://www.yna.co.kr/rss/economy.xml',
+  'https://www.yna.co.kr/rss/politics.xml',
+  'https://www.yna.co.kr/rss/society.xml'
+];
+
 const keywords = [
   '화재', '사고', '집회', '실종',
   '폭행', '범죄', '도난', '절도',
@@ -19,17 +26,31 @@ const keywords = [
   '폭우', '산사태', '침수'
 ];
 
+// ✅ rss-parser 초기화 (media:content 수동 파싱 포함)
 const parser = new Parser({
   customFields: {
-    item: ['description', 'content']
+    item: [
+      ['media:content', 'mediaContent', { keepArray: true }],
+      'description',
+      'content'
+    ]
   }
 });
 
-function extractImageUrl(content: string): string | null {
+// ✅ 이미지 추출 함수 (media:content 우선 → <img src> 보조)
+function extractImageUrl(item: any): string | null {
+  // media:content 형식에서 추출
+  if (item.mediaContent?.[0]?.$.url) {
+    return item.mediaContent[0].$.url;
+  }
+
+  // description 혹은 content 내 <img src=""> 태그에서 추출
+  const content = item.description || item.content || '';
   const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
   return imgMatch ? imgMatch[1] : null;
 }
 
+// ✅ 상대 시간 포맷 함수
 export function formatRelativeTimeKST(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
@@ -46,47 +67,50 @@ export function formatRelativeTimeKST(dateString: string): string {
   return `${diffDay}일 전`;
 }
 
+// ✅ 메인 함수: 뉴스 수집 + Supabase 저장
 export async function fetchAndStoreNews(): Promise<void> {
   try {
     const supabase = await createClient();
+    let allNewsItems: any[] = [];
 
-    // ✅ RSS 파싱
-    const feed = await parser.parseURL(YNA_RSS_URL);
-    console.log("📡 전체 RSS 뉴스 개수:", feed.items.length);
+    for (const url of RSS_URLS) {
+      const feed = await parser.parseURL(url);
+      console.log(`📡 ${url} RSS 뉴스 개수:`, feed.items.length);
 
-    // ✅ 키워드 필터 + 데이터 정제
-    const newsItems = feed.items
-      .filter(item => {
-        const title = item.title || '';
-        return keywords.some(keyword => title.includes(keyword));
-      })
-      .map(item => {
-        const content = item.description || item.content || '';
-        const imageUrl = extractImageUrl(content);
-        const keyword = keywords.find(kw => item.title?.includes(kw)) || '';
+      const newsItems = feed.items
+        .filter(item => {
+          const title = item.title || '';
+          return keywords.some(keyword => title.includes(keyword));
+        })
+        .map(item => {
+          const imageUrl = extractImageUrl(item);
+          const keyword = keywords.find(kw => item.title?.includes(kw)) || '';
 
-        return {
-          title: item.title?.replace(/\[\[CDATA\[|\]\]/g, '').trim() || '',
-          press: '연합뉴스',
-          url: item.link || '',
-          created_at: new Date(item.pubDate || '').toISOString(),
-          image: imageUrl,
-          keyword
-        };
-      });
+          return {
+            title: item.title?.replace(/\[\[CDATA\[|\]\]/g, '').trim() || '',
+            press: '연합뉴스',
+            url: item.link || '',
+            created_at: new Date(item.pubDate || '').toISOString(),
+            image: imageUrl,
+            keyword
+          };
+        });
 
-    // ✅ 로그 출력
-    console.log("📰 필터링된 뉴스 개수:", newsItems.length);
-    if (newsItems.length === 0) {
+      allNewsItems = [...allNewsItems, ...newsItems];
+    }
+
+    console.log("📰 전체 필터링된 뉴스 개수:", allNewsItems.length);
+    if (allNewsItems.length === 0) {
       console.warn("⚠️ 필터링된 뉴스가 없습니다.");
       return;
     }
-    console.log("📦 삽입 직전 뉴스 샘플:", JSON.stringify(newsItems[0], null, 2));
 
-    // ✅ Supabase upsert (중복 URL은 덮어쓰기 또는 무시)
+    console.log("📦 삽입 직전 뉴스 샘플:", JSON.stringify(allNewsItems[0], null, 2));
+
+    // ✅ Supabase 저장 (url 기준 중복 방지)
     const { error } = await supabase
       .from('news')
-      .upsert(newsItems, { onConflict: 'url' });
+      .upsert(allNewsItems, { onConflict: 'url' });
 
     if (error) {
       console.error('🚨 Supabase 뉴스 저장 에러:', error);
