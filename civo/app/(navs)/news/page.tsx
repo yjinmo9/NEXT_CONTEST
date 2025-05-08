@@ -1,3 +1,4 @@
+
 import { NewsList } from "@/components/news/news-list"
 import { getNewListAction } from "@/app/actions"
 
