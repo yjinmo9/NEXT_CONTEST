@@ -11,7 +11,13 @@ export type News = {
   keyword: string;
 };
 
-const YNA_RSS_URL = 'https://www.yna.co.kr/rss/society.xml';
+const RSS_URLS = [
+  'https://www.yna.co.kr/rss/news.xml',
+  'https://www.yna.co.kr/rss/economy.xml', 
+  'https://www.yna.co.kr/rss/politics.xml',
+  'https://www.yna.co.kr/rss/society.xml'
+];
+
 const keywords = [
   '화재', '사고', '집회', '실종',
   '폭행', '범죄', '도난', '절도',
@@ -46,47 +52,54 @@ export function formatRelativeTimeKST(dateString: string): string {
   return `${diffDay}일 전`;
 }
 
+
 export async function fetchAndStoreNews(): Promise<void> {
   try {
     const supabase = await createClient();
+    let allNewsItems = [];
 
-    // ✅ RSS 파싱
-    const feed = await parser.parseURL(YNA_RSS_URL);
-    console.log("📡 전체 RSS 뉴스 개수:", feed.items.length);
+    // 각 RSS URL에서 뉴스 수집
+    for (const url of RSS_URLS) {
+      // ✅ RSS 파싱
+      const feed = await parser.parseURL(url);
+      console.log(`📡 ${url} RSS 뉴스 개수:`, feed.items.length);
 
-    // ✅ 키워드 필터 + 데이터 정제
-    const newsItems = feed.items
-      .filter(item => {
-        const title = item.title || '';
-        return keywords.some(keyword => title.includes(keyword));
-      })
-      .map(item => {
-        const content = item.description || item.content || '';
-        const imageUrl = extractImageUrl(content);
-        const keyword = keywords.find(kw => item.title?.includes(kw)) || '';
+      // ✅ 키워드 필터 + 데이터 정제
+      const newsItems = feed.items
+        .filter(item => {
+          const title = item.title || '';
+          return keywords.some(keyword => title.includes(keyword));
+        })
+        .map(item => {
+          const content = item.description || item.content || '';
+          const imageUrl = extractImageUrl(content);
+          const keyword = keywords.find(kw => item.title?.includes(kw)) || '';
 
-        return {
-          title: item.title?.replace(/\[\[CDATA\[|\]\]/g, '').trim() || '',
-          press: '연합뉴스',
-          url: item.link || '',
-          created_at: new Date(item.pubDate || '').toISOString(),
-          image: imageUrl,
-          keyword
-        };
-      });
+          return {
+            title: item.title?.replace(/\[\[CDATA\[|\]\]/g, '').trim() || '',
+            press: '연합뉴스',
+            url: item.link || '',
+            created_at: new Date(item.pubDate || '').toISOString(),
+            image: imageUrl,
+            keyword
+          };
+        });
+
+      allNewsItems = [...allNewsItems, ...newsItems];
+    }
 
     // ✅ 로그 출력
-    console.log("📰 필터링된 뉴스 개수:", newsItems.length);
-    if (newsItems.length === 0) {
+    console.log("📰 전체 필터링된 뉴스 개수:", allNewsItems.length);
+    if (allNewsItems.length === 0) {
       console.warn("⚠️ 필터링된 뉴스가 없습니다.");
       return;
     }
-    console.log("📦 삽입 직전 뉴스 샘플:", JSON.stringify(newsItems[0], null, 2));
+    console.log("📦 삽입 직전 뉴스 샘플:", JSON.stringify(allNewsItems[0], null, 2));
 
     // ✅ Supabase upsert (중복 URL은 덮어쓰기 또는 무시)
     const { error } = await supabase
       .from('news')
-      .upsert(newsItems, { onConflict: 'url' });
+      .upsert(allNewsItems, { onConflict: 'url' });
 
     if (error) {
       console.error('🚨 Supabase 뉴스 저장 에러:', error);
