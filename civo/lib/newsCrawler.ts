@@ -1,4 +1,5 @@
-import axios from 'axios';
+import Parser from 'rss-parser';
+import { createClient } from '@/utils/supabase/server';
 
 export type News = {
   id: number;
@@ -6,85 +7,94 @@ export type News = {
   press: string;
   url: string;
   created_at: string;
-  image: string;
+  image: string | null;
+  keyword: string;
 };
 
-const keywords = ['화재', '사고', '집회', '실종'];
+const YNA_RSS_URL = 'https://www.yna.co.kr/rss/society.xml';
+const keywords = [
+  '화재', '사고', '집회', '실종',
+  '폭행', '범죄', '도난', '절도',
+  '강도', '추락', '붕괴', '지진',
+  '폭우', '산사태', '침수'
+];
 
-const NEWSDATA_API_KEY = process.env.NEWSDATA_API_KEY;
-const NEWSDATA_API_URL = 'https://newsdata.io/api/1/news';
-
-export async function fetchGoogleNewsAll(): Promise<News[]> {
-  const allNews: News[] = [];
-  let idCounter = 1;
-
-  for (const keyword of keywords) {
-    const newsItems = await fetchNewsData(keyword, idCounter);
-    allNews.push(...newsItems);
-    idCounter += newsItems.length;
+const parser = new Parser({
+  customFields: {
+    item: ['description', 'content']
   }
+});
 
-  return allNews;
+function extractImageUrl(content: string): string | null {
+  const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return imgMatch ? imgMatch[1] : null;
 }
 
-async function fetchNewsData(keyword: string, startId = 1): Promise<News[]> {
-  try {
-    const response = await axios.get(NEWSDATA_API_URL, {
-      params: {
-        apikey: NEWSDATA_API_KEY,
-        q: keyword,
-        language: 'ko',
-        country: 'kr',
-        category: 'top',
-      },
-    });
+export function formatRelativeTimeKST(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
 
-    const items = response.data.results || [];
-
-    return items.map((item: any, idx: number) => ({
-      id: startId + idx,
-      title: item.title,
-      press: item.source_id || '언론사 미상',
-      url: item.link,
-      created_at: formatRelativeTimeKST(item.pubDate),
-      image: item.image_url || null,
-    }));
-  } catch (error) {
-    console.error('NewsData.io API Error:', error);
-    return [];
-  }
-}
-
-export function formatRelativeTimeKST(dateString: string | Date): string {
-  const utcDate = typeof dateString === 'string' ? new Date(dateString) : dateString;
-  if (isNaN(utcDate.getTime())) return '';
-
-  const now = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
-  const kstTime = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
-
-  const diffMs = now.getTime() - kstTime.getTime();
-  if (diffMs < 0) return '방금 전';
-
+  const diffMs = now.getTime() - date.getTime();
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);
-  const diffHr = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHr / 24);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
 
-  if (diffSec < 60) return `${diffSec}초 전`;
+  if (diffSec < 60) return '방금 전';
   if (diffMin < 60) return `${diffMin}분 전`;
-  if (diffHr < 24) return `${diffHr}시간 전`;
+  if (diffHour < 24) return `${diffHour}시간 전`;
   return `${diffDay}일 전`;
 }
 
-export function formatKSTDateString(dateInput: string | Date): string {
-  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
-  if (isNaN(date.getTime())) return '';
+export async function fetchAndStoreNews(): Promise<void> {
+  try {
+    const supabase = await createClient();
 
-  const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+    // ✅ RSS 파싱
+    const feed = await parser.parseURL(YNA_RSS_URL);
+    console.log("📡 전체 RSS 뉴스 개수:", feed.items.length);
 
-  const year = kst.getFullYear();
-  const month = String(kst.getMonth() + 1).padStart(2, '0');
-  const day = String(kst.getDate()).padStart(2, '0');
+    // ✅ 키워드 필터 + 데이터 정제
+    const newsItems = feed.items
+      .filter(item => {
+        const title = item.title || '';
+        return keywords.some(keyword => title.includes(keyword));
+      })
+      .map(item => {
+        const content = item.description || item.content || '';
+        const imageUrl = extractImageUrl(content);
+        const keyword = keywords.find(kw => item.title?.includes(kw)) || '';
 
-  return `${year}.${month}.${day}`;
+        return {
+          title: item.title?.replace(/\[\[CDATA\[|\]\]/g, '').trim() || '',
+          press: '연합뉴스',
+          url: item.link || '',
+          created_at: new Date(item.pubDate || '').toISOString(),
+          image: imageUrl,
+          keyword
+        };
+      });
+
+    // ✅ 로그 출력
+    console.log("📰 필터링된 뉴스 개수:", newsItems.length);
+    if (newsItems.length === 0) {
+      console.warn("⚠️ 필터링된 뉴스가 없습니다.");
+      return;
+    }
+    console.log("📦 삽입 직전 뉴스 샘플:", JSON.stringify(newsItems[0], null, 2));
+
+    // ✅ Supabase upsert (중복 URL은 덮어쓰기 또는 무시)
+    const { error } = await supabase
+      .from('news')
+      .upsert(newsItems, { onConflict: 'url' });
+
+    if (error) {
+      console.error('🚨 Supabase 뉴스 저장 에러:', error);
+    } else {
+      console.log('✅ 뉴스가 성공적으로 저장되었습니다!');
+    }
+
+  } catch (error) {
+    console.error('❌ RSS 피드 파싱 에러:', error);
+  }
 }

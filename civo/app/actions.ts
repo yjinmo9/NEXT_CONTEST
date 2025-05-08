@@ -4,7 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { fetchGoogleNewsAll } from "@/lib/newsCrawler";
+import { fetchAndStoreNews,formatRelativeTimeKST } from "@/lib/newsCrawler";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -135,52 +135,66 @@ export const signOutAction = async () => {
 };
 
 export const postAction = async (formData: FormData): Promise<void> => {
-
-  Array.from(formData.entries()).forEach(([key, value]) => {
-    console.log(key, value);
-  });
-  /*
   const title = formData.get("title")?.toString();
   const content = formData.get("content")?.toString();
+  const type = formData.get("type")?.toString() || 'incident'; // type 필드 추가
+  const mediaUrls = formData.getAll("media_urls").map(url => url.toString());
+  const userLat = parseFloat(formData.get("user_lat") as string);
+  const userLng = parseFloat(formData.get("user_lng") as string);
+  const reportLat = parseFloat(formData.get("report_lat") as string);
+  const reportLng = parseFloat(formData.get("report_lng") as string);
 
-  if (!title || !content) {
-    console.error("제목과 내용은 필수입니다.");
-    throw new Error("제목과 내용은 필수입니다."); // ❗ throw 사용
-  }
+  // missing 관련 필드 추가
+  const missingName = formData.get("missing_name")?.toString();
+  const missingAge = parseInt(formData.get("missing_age") as string);
+  const missingGender = formData.get("missing_gender")?.toString();
 
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("reports")
-    .insert([{ title, content }]);
+    .insert([{
+      title,
+      content,
+      type, // type 필드 추가
+      media_urls: mediaUrls,
+      user_lat: userLat,
+      user_lng: userLng,
+      report_lat: reportLat,
+      report_lng: reportLng,
+      status: 'pending',
+      // missing 관련 필드 추가
+      missing_name: missingName,
+      missing_age: missingAge,
+      missing_gender: missingGender
+    }]);
 
   if (error) {
     console.error("데이터 삽입 오류:", error.message);
-    throw new Error(error.message); // ❗ throw 사용
+    throw new Error(error.message);
   }
 
   console.log("Report created successfully:", data);
-  // ✅ 성공 시 아무 것도 반환하지 않음 (void)
-  */
-
-  redirect('/report/done')
+  redirect('/report/done');
 };
 
 export const getNewListAction = async () => {
-  const data = await fetchGoogleNewsAll()
-/*
+  await fetchAndStoreNews(); // 새로운 뉴스 데이터 가져와서 저장
+  
   const supabase = await createClient();
-
   const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .from('news')
+    .select('*')
+    .order('created_at', { ascending: false });
 
   if (error) {
-    console.error("뉴스 리스트 에러:", error.message);
+    console.error('뉴스 조회 에러:', error);
     return [];
   }
-*/
-  return data;
+
+  return data.map(item => ({
+    ...item,
+    created_at: formatRelativeTimeKST(item.created_at)
+  }));
 };
 
