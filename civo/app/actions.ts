@@ -135,6 +135,8 @@ export const signOutAction = async () => {
 };
 
 export const postAction = async (formData: FormData): Promise<void> => {
+  console.log('NODE_EXTRA_CA_CERTS:', process.env.NODE_EXTRA_CA_CERTS);
+  
   const title = formData.get("title")?.toString();
   const content = formData.get("content")?.toString();
   const type = formData.get("type")?.toString() || 'incident'; // type 필드 추가

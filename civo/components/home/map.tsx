@@ -3,6 +3,7 @@
 export type NaverMap = naver.maps.Map;
 type Lng = number;
 type Lat = number;
+
 export type Coordinates = [Lng, Lat];
 
 import Script from "next/script";
@@ -56,7 +57,7 @@ export default function Map({ loc, onReady, enableRecenterButton = false }: {
       ></Script>
       <div id={mapId} style={{ width: "100%", height: "100%" }} />
       {enableRecenterButton && (
-        <button type="button" onClick={recenter} className="fixed inset-0 mt-[156px] ml-[341px]">
+        <button type="button" onClick={recenter} className="fixed top-[20vh] right-[5vw]">
           <Image
             src={Located}
             alt="현위치"
