@@ -10,6 +10,7 @@ import "./globals.css";
 import Navermap from "@/components/home/navermap";
 import Footer from "@/components/ui/footer";
 import Header from "@/components/ui/header";
+import { icons } from "lucide-react";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -19,6 +20,7 @@ export const metadata = {
   metadataBase: new URL(defaultUrl),
   title: "CIVO",
   description: "우리 주변의 소식을 가장 빠르게 보는 방법",
+  icon: '/favicon.png',
 };
 
 const geistSans = Geist({
