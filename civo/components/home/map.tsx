@@ -8,6 +8,7 @@ import Located from "@/src/img/located.png";
 export type NaverMap = naver.maps.Map;
 type Lng = number;
 type Lat = number;
+
 export type Coordinates = [Lng, Lat];
 
 const mapId = "naver-map";
@@ -66,12 +67,13 @@ export default function Map({
       />
       <div id={mapId} style={{ width: "100%", height: "100%" }} />
       {enableRecenterButton && (
-        <button
-          type="button"
-          onClick={recenter}
-          className="fixed inset-0 mt-[156px] ml-[341px]"
-        >
-          <Image src={Located} alt="현위치" width={40} height={40} />
+        <button type="button" onClick={recenter} className="fixed top-[20vh] right-[5vw]">
+          <Image
+            src={Located}
+            alt="현위치"
+            width={40}
+            height={40}
+          />
         </button>
       )}
     </>
