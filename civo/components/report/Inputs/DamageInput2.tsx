@@ -29,7 +29,7 @@ export default function DamageInput2() {
                 <div id="사진/영상">
                     <Label htmlFor="file-upload" className="font-semibold text-[15px]">사진 <span className="text-red-700">*</span></Label>
                     <p className="mt-[12px] text-description text-[15px]">기물파손 상태를 파악할 수 있는 사진을 업로드해 주세요.</p>
-                    <ImageInput className="mt-[10px] flex flex-col gap-4 items-center" />
+                    <ImageInput className="mt-[10px] flex flex-col gap-4 items-center" w={362} h={365}/>
                 </div>
                 <input type="hidden" name="title" value={data.title} />
                 <input type="hidden" name="content" value={data.content} />

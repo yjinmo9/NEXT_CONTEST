@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 
-export default function ImageInput({ className }: { className: string }) {
+export default function ImageInput({ className, h, w }: { className: string, h:number, w:number }) {
     const [file, setFile] = useState<File | null>(null);
 
     const [preview, setPreview] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export default function ImageInput({ className }: { className: string }) {
     return (
         <div className={className}>
             {preview ? (
-                <div className="relative w-[362px] h-[365px] rounded-lg overflow-hidden border border-gray-300">
+                <div className={`relative w-[${w}px] h-[${h}px] rounded-lg overflow-hidden border border-gray-300`}>
                     <Image
                         src={preview}
                         alt="미리보기"
@@ -67,7 +67,7 @@ export default function ImageInput({ className }: { className: string }) {
             ) : (
                 <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-[362px] h-[365px] rounded-lg border border-gray-300 flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-100"
+                    className={`w-[${w}px] h-[${h}px] rounded-lg border border-gray-300 flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-100`}
                 >
                     <span className="text-2xl">＋</span>
                     <p className="text-[15px]">사진 업로드</p>

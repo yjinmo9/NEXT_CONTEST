@@ -62,7 +62,7 @@ export default function IncidentInput() {
                 <div id="사진/영상">
                     <Label htmlFor="file-upload" className="font-semibold text-[15px]">사진 · 영상 <span className="text-red-700">*</span></Label>
                     <p className="mt-[12px] text-description text-[15px]">사고를 파악할 수 있는 사진/영상을 업로드해 주세요.</p>
-                    <ImageInput className="mt-[10px] flex gap-4" />
+                    <ImageInput className="mt-[10px] flex gap-4" w={126} h={126}/>
                 </div>
                 <div id="사고 내용" className="flex flex-col">
                     <Label htmlFor="content" className="font-semibold text-[15px]">사고 내용</Label>
