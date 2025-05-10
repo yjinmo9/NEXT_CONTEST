@@ -1,6 +1,6 @@
 'use client';
 
-import {IncidentInput} from "@/components/report/report";
+import IncidentInput from "@/components/report/Inputs/IncidentReport";
 import { useEffect } from "react";
 
 export default function incidentReport() {

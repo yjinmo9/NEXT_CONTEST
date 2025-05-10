@@ -2,7 +2,11 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { IncidentInput, MissingInput1, MissingInput2, DamageInput1, DamageInput2 } from './report';
+import IncidentInput from './IncidentReport';
+import MissingInput1 from './MissingInput1';
+import MissingInput2 from './MissingInput2';
+import DamageInput1 from './DamageInput1';
+import DamageInput2 from './DamageInput2';
 
 // default export 대신 named export로 변경
 export function ReportInput() {
