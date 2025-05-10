@@ -27,13 +27,39 @@ export function IncidentInput() {
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0];
-        if (selected) {
-            setFile(selected);
-            setPreview(URL.createObjectURL(selected));
+        if (!selected) return;
+      
+        setFile(selected);
+        setPreview(URL.createObjectURL(selected));
+      
+        try {
+          const formData = new FormData();
+          formData.append('file', selected);
+      
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+      
+          const result = await res.json();
+      
+          if (!res.ok) {
+            console.error('❌ Upload failed:', result.error || 'Unknown error');
+            return;
+          }
+      
+          console.log('✅ 업로드 성공! URL:', result.url);
+      
+          // 🔸 이후 media_urls에 넣는 로직이 있다면 여기서 처리 가능
+          // 예: setUploadedUrl(result.url);
+      
+        } catch (error) {
+          console.error('❌ 예외 발생:', error);
         }
-    };
+      };
+      ;
 
     const [loc, setLoc] = useState<Coordinates>([127.02, 37.58]);
     const [userloc, setUserloc] = useState<Coordinates>([0, 0]);
@@ -229,13 +255,39 @@ export function MissingInput2() {
     const [preview, setPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0];
-        if (selected) {
-            setFile(selected);
-            setPreview(URL.createObjectURL(selected));
+        if (!selected) return;
+      
+        setFile(selected);
+        setPreview(URL.createObjectURL(selected));
+      
+        try {
+          const formData = new FormData();
+          formData.append('file', selected);
+      
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+      
+          const result = await res.json();
+      
+          if (!res.ok) {
+            console.error('❌ Upload failed:', result.error || 'Unknown error');
+            return;
+          }
+      
+          console.log('✅ 업로드 성공! URL:', result.url);
+      
+          // 🔸 이후 media_urls에 넣는 로직이 있다면 여기서 처리 가능
+          // 예: setUploadedUrl(result.url);
+      
+        } catch (error) {
+          console.error('❌ 예외 발생:', error);
         }
-    };
+      };
+      
 
     return (
         <form encType="multipart/form-data" className="flex-1 flex flex-col min-w-64 h-full pointer-events-auto">
@@ -352,13 +404,39 @@ export function DamageInput2() {
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0];
-        if (selected) {
-            setFile(selected);
-            setPreview(URL.createObjectURL(selected));
+        if (!selected) return;
+      
+        setFile(selected);
+        setPreview(URL.createObjectURL(selected));
+      
+        try {
+          const formData = new FormData();
+          formData.append('file', selected);
+      
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+      
+          const result = await res.json();
+      
+          if (!res.ok) {
+            console.error('❌ Upload failed:', result.error || 'Unknown error');
+            return;
+          }
+      
+          console.log('✅ 업로드 성공! URL:', result.url);
+      
+          // 🔸 이후 media_urls에 넣는 로직이 있다면 여기서 처리 가능
+          // 예: setUploadedUrl(result.url);
+      
+        } catch (error) {
+          console.error('❌ 예외 발생:', error);
         }
-    };
+      };
+      
 
     const [userloc, setUserloc] = useState<Coordinates | null>([0, 0]);
 
