@@ -62,7 +62,7 @@ export default function Map({
       <Script
         strategy="afterInteractive"
         type="text/javascript"
-        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${process.env.NEXT_PUBLIC_MAP_CLIENT_ID}`}
+        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.NEXT_PUBLIC_MAP_CLIENT_ID}`}
         onReady={initializeMap}
       />
       <div id={mapId} style={{ width: "100%", height: "100%" }} />
