@@ -8,6 +8,6 @@ export default function DanmageReport2() {
         window.scrollTo(0, 0);
       }, []);
     return(
-        <MissingFormStep2/>
+        <MissingInput2/>
     )
 }
