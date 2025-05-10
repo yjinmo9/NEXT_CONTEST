@@ -74,7 +74,7 @@ export default function IncidentInput() {
                 <input type="hidden" name="user_lat" value={typeof userloc?.[1] === 'number' ? userloc[1] : ''} />
                 <input type="hidden" name="user_lng" value={typeof userloc?.[0] === 'number' ? userloc[0] : ''} />
 
-                <SubmitButton pendingText="Posting.." formAction={postAction} className="h-[53px]">
+                <SubmitButton pendingText="제출 중..." formAction={postAction} className="h-[53px]">
                     신고하기
                 </SubmitButton>
             </div>
