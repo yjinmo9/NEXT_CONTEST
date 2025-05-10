@@ -8,6 +8,6 @@ export default function DanmageReport1() {
         window.scrollTo(0, 0);
       }, []);
     return(
-        <DamageInput1 />
+            <DamageFormStep1 />
     )
 }
