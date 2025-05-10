@@ -115,7 +115,7 @@ export default function LocateSelector({ onLocateChange }: { onLocateChange?: ({
                     <Image src={searchGlyphImg} alt="돋보기" width={21} height={19} />
                     <input
                         type="text"
-                        placeholder="지역/사건 검색하기"
+                        placeholder="지역 검색"
                         className={`w-full text-[13px] ${showSuggestions ? "bg-gray-100" : "bg-white"}`}
                         value={query}
                         onChange={(e) => { setShowSuggestions(true); setQuery(e.target.value ?? ''); }}
