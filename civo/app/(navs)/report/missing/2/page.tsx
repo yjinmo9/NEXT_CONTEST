@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect } from "react";
-import { MissingInput2 } from "@/components/report/report";
+import MissingFormStep2 from "@/components/report/inputs/MissingFormStep2";
 
 export default function DanmageReport2() {
     useEffect(() => {
         window.scrollTo(0, 0);
       }, []);
     return(
-        <MissingInput2/>
+        <MissingFormStep2/>
     )
 }
