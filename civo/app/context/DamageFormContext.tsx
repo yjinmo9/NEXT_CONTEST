@@ -6,6 +6,8 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 type DamageFormData = {
   title: string;
   content: string;
+  report_lng: number;
+  report_lat: number;
 };
 
 type DamageFormContextType = {
@@ -19,6 +21,8 @@ export function DamageFormProvider({ children }: { children: ReactNode }) {
   const [data, setDataState] = useState<DamageFormData>({
     title: '',
     content: '',
+    report_lat: 0,
+    report_lng: 0,
   });
 
   const setData = (partial: Partial<DamageFormData>) => {

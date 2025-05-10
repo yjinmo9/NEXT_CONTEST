@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from "react";
-import DamageFormStep1 from "@/components/report/inputs/DamageFormStep1";
+import DamageInput1 from "@/components/report/Inputs/DamageInput1";
 
 export default function DanmageReport1() {
     useEffect(() => {
