@@ -2,7 +2,7 @@ import FetchDataSteps from "@/components/tutorial/fetch-data-steps";
 import { createClient } from "@/utils/supabase/server";
 import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
-import ReportInput from "@/components/report/report";
+import { ReportInput } from "@/components/report/ReportInput";
 
 export default async function ProtectedPage() {
   const supabase = await createClient();
@@ -32,7 +32,7 @@ export default async function ProtectedPage() {
       </div>
       <div>
         <h2 className="font-medium text-xl mb-4">Report</h2>
-        <ReportInput/>
+        <ReportInput />
         <h2 className="font-bold text-2xl mb-4">Next steps</h2>
         <FetchDataSteps />
       </div>
