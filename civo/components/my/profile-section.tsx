@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 
+
+
 export function ProfileSection() {
   return (
     <div className="px-[20px] py-[16px]">
@@ -9,7 +11,7 @@ export function ProfileSection() {
       <div className="flex items-center gap-[10px]">
         <div className="relative w-[50px] h-[50px]">
           <Image 
-            src="/default-profile.png" 
+            src="/img/help.png"  
             alt="프로필" 
             width={50}
             height={50}
