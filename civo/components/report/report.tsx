@@ -35,17 +35,16 @@ export function IncidentInput() {
         }
     };
 
-    const [locate, setLocate] = useState<string | null>('');
+    const [loc, setLoc] = useState<Coordinates>([127.02, 37.58]);
+    const [userloc, setUserloc] = useState<Coordinates>([0, 0]);
 
-    const [locateChoice, setLocateChoice] = useState<boolean>(false);
-
-    const [selectedLocation, setSelectedLocation] = useState<Coordinates | null>(null);
-
-    const [loc, setLoc] = useState<Coordinates>();
+    const handleLocationChange = ({ loc, locStr }: { loc: Coordinates, locStr: string }) => {
+        setLoc(loc)
+    }
 
     const initLocation = () => {
         navigator.geolocation.getCurrentPosition((position) => {
-            setLoc([position.coords.longitude, position.coords.latitude]);
+            setUserloc([position.coords.longitude, position.coords.latitude]);
         });
     };
 
@@ -53,49 +52,8 @@ export function IncidentInput() {
         initLocation();
     }, []);
 
-    const handleLocationConfirm = async () => {
-        console.log(selectedLocation)
-        if (!selectedLocation) return;
-
-        const res = await fetch(
-            `/api/location?lat=${selectedLocation[0]}&lon=${selectedLocation[1]}`
-        );
-        const data = await res.json();
-
-        const roadAddr = data.results?.find((r: any) => r.name === 'roadaddr');
-        const fullAddr = [
-            roadAddr?.region?.area1?.name,
-            roadAddr?.region?.area2?.name,
-            roadAddr?.land?.name,
-            roadAddr?.land?.number1,
-        ]
-            .filter(Boolean)
-            .join(' ');
-
-        setLocate(fullAddr);
-        setLocateChoice(false);
-    }
     return (
         <form className="pb-[100px] flex-1 flex flex-col min-w-64 h-full pointer-events-auto" encType="multipart/form-data">
-            {locateChoice && loc && (
-                <div className="relative w-full h-screen overflow-hidden px-[20px] z-20">
-                    <div className="fixed inset-0 z-0">
-                        <MapWithMarker
-                            loc={loc}
-                            onCenterChange={setSelectedLocation}
-                            onConfirm={handleLocationConfirm}
-                        />
-                    </div>
-                    <div
-                        id="searchfield"
-                        className="fixed inset-0 mt-[108px] mx-[10px] pt-[8px] pb-[7px] pl-[8px] pr-[8px] h-[36px] z-20 bg-white rounded-[10px] drop-shadow-[0_2px_6px_rgba(0,0,0,0.15)] flex gap-[8px] pointer-events-auto"
-                    >
-                        <Image src={searchGlyphImg} alt="돋보기" width={21} height={19} />
-                        <input placeholder="지역/사건 검색하기" className="w-full text-[13px]" />
-                    </div>
-                </div>
-            )}
-
             <div className="mt-[5px] flex-grow overflow-y-auto min-h-0 flex flex-col gap-[32px]">
                 <input type="hidden" name="type" value="incident" />
                 <div id="사고유형">
@@ -120,24 +78,7 @@ export function IncidentInput() {
                 {selected && (
                     <input type="hidden" name="category" value={selected} />
                 )}
-                <div id="사고 위치">
-                    <Label htmlFor="locate" className="font-semibold text-[15px]">사고 위치 <span className="text-red-700">*</span></Label>
-                    <div className={`py-[8px] mt-[12px] border rounded-[10px] border-formborder flex flex-col justify-center px-4 gap-[10px] ${locate?"text-black":"text-description"}`}>
-                        {locate ? (
-                            <span>{locate}</span>
-                        ) : (
-                            <AutoLocationFetcher />
-                        )}
-                        <button
-                            type="button"
-                            className="text-[15px] text-gray-500 border border-gray-500 border-[0.8px] rounded-[10px] px-3 py-[2px] w-[155px] h-[30px]"
-                            onClick={() => setLocateChoice(true)}
-                        >
-                            이 위치가 아닌가요?
-                        </button>
-                    </div>
-
-                </div>
+                <LocateSelector onLocateChange={handleLocationChange} />
                 <div id="신고 제목">
                     <Label htmlFor="title" className="font-semibold text-[15px]">신고 제목 <span className="text-red-700">*</span></Label>
                     <Input name="title" placeholder="신고 제목을 입력해주세요" className="mt-[12px] h-[52px] border rounded-[10px] border-formborder placeholder-description" required />
@@ -180,6 +121,12 @@ export function IncidentInput() {
                     <Label htmlFor="content" className="font-semibold text-[15px]">사고 내용</Label>
                     <TextareaAutosize className="mt-[12px] min-h-[176px] py-[10px] px-[15px] border rounded-[10px] border-formborder placeholder-description" name="content" placeholder="사고내용을 작성해주세요" required />
                 </div>
+                <input type="hidden" name="report_lat" value={typeof loc?.[1] === 'number' ? loc[1] : ''} />
+                <input type="hidden" name="report_lng" value={typeof loc?.[0] === 'number' ? loc[0] : ''} />
+
+                <input type="hidden" name="user_lat" value={typeof userloc?.[1] === 'number' ? userloc[1] : ''} />
+                <input type="hidden" name="user_lng" value={typeof userloc?.[0] === 'number' ? userloc[0] : ''} />
+
                 <SubmitButton pendingText="Posting.." formAction={postAction} className="h-[53px]">
                     신고하기
                 </SubmitButton>
@@ -362,7 +309,13 @@ export function DamageInput1() {
     const router = useRouter();
     const { data, setData } = useDamageForm();
     const isValid = data.title.trim() !== '' && data.content.trim() !== '';
-    const [locate, setlocate] = useState<string|null>("")
+    const [locStr, setLocStr] = useState<string | null>('');
+    const [loc, setLoc] = useState<Coordinates | null>(null);
+
+    const handleLocationChange = ({ loc, locStr }: { loc: Coordinates, locStr: string }) => {
+        setLocStr(locStr)
+        setLoc(loc)
+    }
     return (
         <form className="flex-1 flex flex-col min-w-64 h-full pointer-events-auto" encType="multipart/form-data">
             <div className="mt-[5px] flex-grow overflow-y-auto min-h-0 flex flex-col gap-[32px]">
@@ -370,11 +323,13 @@ export function DamageInput1() {
                     <Label htmlFor="title" className="font-semibold text-[15px]">파손신고 제목 <span className="text-red-700">*</span></Label>
                     <Input name="title" placeholder="파손신고 제목을 입력해주세요" className="mt-[12px] h-[52px] border rounded-[10px] border-formborder placeholder-description" onChange={(e) => setData({ title: e.target.value })} required />
                 </div>
-                <LocateSelector onLocateChange={setlocate}/>
+                <LocateSelector onLocateChange={handleLocationChange} />
                 <div id="파손 내용" className="flex flex-col">
                     <Label htmlFor="content" className="font-semibold text-[15px]">파손 내용 <span className="text-red-700">*</span></Label>
                     <TextareaAutosize className="mt-[12px] min-h-[calc(100vh-600px)] py-[10px] px-[15px] border rounded-[10px] border-formborder placeholder-description" name="content" placeholder="파손 내용을 작성해주세요" onChange={(e) => setData({ content: e.target.value })} required />
                 </div>
+                <input type="hidden" name="report_lat">{loc?.[1]}</input>
+                <input type="hidden" name="report_lng">{loc?.[0]}</input>
                 <button
                     type="button"
                     disabled={!isValid}
@@ -404,6 +359,18 @@ export function DamageInput2() {
             setPreview(URL.createObjectURL(selected));
         }
     };
+
+    const [userloc, setUserloc] = useState<Coordinates | null>([0, 0]);
+
+    const initLocation = () => {
+        navigator.geolocation.getCurrentPosition((position) => {
+            setUserloc([position.coords.longitude, position.coords.latitude]);
+        });
+    };
+
+    useEffect(() => {
+        initLocation();
+    }, []);
 
     return (
         <form encType="multipart/form-data" className="flex-1 flex flex-col min-w-64 h-full pointer-events-auto">
@@ -455,6 +422,8 @@ export function DamageInput2() {
 
                 <input type="hidden" name="title" value={data.title} />
                 <input type="hidden" name="content" value={data.content} />
+                <input type="hidden" name="user_lat" value={userloc?.[1]} />
+                <input type="hidden" name="user_lng" value={userloc?.[0]} />
                 <SubmitButton formAction={postAction} pendingText="제출 중..." className="h-[53px] bg-black text-white rounded-[10px]">
                     신고하기
                 </SubmitButton>
