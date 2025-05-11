@@ -68,11 +68,11 @@ export default function IncidentInput() {
                     <Label htmlFor="content" className="font-semibold text-[15px]">사고 내용</Label>
                     <TextareaAutosize className="mt-[12px] min-h-[176px] py-[10px] px-[15px] border rounded-[10px] border-formborder placeholder-description" name="content" placeholder="사고내용을 작성해주세요" required />
                 </div>
-                <input type="hidden" name="report_lat" value={typeof loc?.[1] === 'number' ? loc[1] : ''} />
-                <input type="hidden" name="report_lng" value={typeof loc?.[0] === 'number' ? loc[0] : ''} />
+                <input type="hidden" name="report_lng" value={typeof loc?.[1] === 'number' ? loc[1] : ''} />
+                <input type="hidden" name="report_lat" value={typeof loc?.[0] === 'number' ? loc[0] : ''} />
 
-                <input type="hidden" name="user_lat" value={typeof userloc?.[1] === 'number' ? userloc[1] : ''} />
-                <input type="hidden" name="user_lng" value={typeof userloc?.[0] === 'number' ? userloc[0] : ''} />
+                <input type="hidden" name="user_lng" value={typeof userloc?.[1] === 'number' ? userloc[1] : ''} />
+                <input type="hidden" name="user_lat" value={typeof userloc?.[0] === 'number' ? userloc[0] : ''} />
 
                 <SubmitButton pendingText="제출 중..." formAction={postAction} className="h-[53px]">
                     신고하기

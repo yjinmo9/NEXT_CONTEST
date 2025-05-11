@@ -1,3 +1,5 @@
+export const runtime = 'nodejs'; // 👈 이거 추가
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
@@ -25,19 +27,19 @@ export async function POST(request: Request) {
     user_id,
     type,               // 'incident' | 'damage' | 'missing'
     title,
-    content,
-    category,
-    media_urls,
-    user_lat,
-    user_lng,
-    report_lat,
-    report_lng,
+    content, // 신고 내용
+    category, // 신고 카테고리
+    media_urls, // 신고 이미지 주소
+    user_lat, // 신고자 위도
+    user_lng, // 신고자 경도
+    report_lat, // 신고 위도
+    report_lng, // 신고 경도
     // 실종 제보 전용 필드
-    missing_name,
-    missing_age,
-    missing_gender,
-    missing_lat,
-    missing_lng,
+    missing_name, // 실종자 이름  
+    missing_age, // 실종자 나이
+    missing_gender, // 실종자 성별
+    missing_lat, // 실종자 위도
+    missing_lng, // 실종자 경도
   } = body;
 
   // ✅ 필수값 유효성 검사
@@ -51,6 +53,7 @@ export async function POST(request: Request) {
 
   // ✅ 사용자 위치와 신고 위치 간 거리 계산 (미터 단위)
   const distance_m = getDistanceInMeters(user_lat, user_lng, report_lat, report_lng);
+  console.log('Calculated distance:', distance_m);
 
   // ✅ 저장할 데이터 구성
   const reportData: any = {
@@ -58,7 +61,7 @@ export async function POST(request: Request) {
     type,
     title,
     content,
-    category: category || null,
+    category: type === 'missing' ? '실종' : category || null, // ✅ 이 라인!
     media_urls: media_urls || [],
     user_lat,
     user_lng,
@@ -67,6 +70,7 @@ export async function POST(request: Request) {
     distance_m,
     status: 'pending',
   };
+  console.log('Report data to insert:', reportData);
 
   // ✅ 실종 제보의 경우, 추가 정보 저장
   if (type === 'missing') {
