@@ -6,6 +6,9 @@ import { Label } from "@/components/ui/label";
 import TextareaAutosize from "react-textarea-autosize"
 import { useRouter } from "next/navigation";
 import { useMissingForm } from "@/app/context/MissingFormContext";
+import LocateSelector from "../LocateSelector";
+import { useState } from "react";
+import { Coordinates } from "@/components/home/map";
 
 export default function MissingInput1() {
     const router = useRouter();
@@ -16,6 +19,14 @@ export default function MissingInput1() {
         data.content.trim() !== "" &&
         data.gender.trim() !== "" &&
         data.age !== 0;
+
+    const [locStr, setLocStr] = useState<string | null>('');
+    const [loc, setLoc] = useState<Coordinates | null>(null);
+
+    const handleLocationChange = ({ loc, locStr }: { loc: Coordinates, locStr: string }) => {
+        setLocStr(locStr)
+        setLoc(loc)
+    }
 
     return (
         <form className="flex-1 flex flex-col min-w-64 h-full pointer-events-auto" encType="multipart/form-data">
@@ -66,6 +77,7 @@ export default function MissingInput1() {
                         입니다.
                     </p>
                 </div>
+                <LocateSelector onLocateChange={handleLocationChange} name="실종 위치 "/>
                 <div id="실종 상황" className="flex flex-col">
                     <Label htmlFor="content" className="font-semibold text-[15px]">
                         실종 당시 상황 <span className="text-red-700">*</span>
