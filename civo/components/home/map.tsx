@@ -8,7 +8,7 @@ import Located from "@/src/img/located.png";
 export type NaverMap = naver.maps.Map;
 type Lng = number;
 type Lat = number;
-export type Coordinates = [Lng, Lat];
+export type Coordinates = [Lat, Lng];
 
 const mapId = "naver-map";
 const DEFAULT_COORDINATES: Coordinates = [126.9784147, 37.5666805];
@@ -90,7 +90,7 @@ export default function Map({
       <Script
         strategy="afterInteractive"
         type="text/javascript"
-        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${process.env.NEXT_PUBLIC_MAP_CLIENT_ID}`}
+        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.NEXT_PUBLIC_MAP_CLIENT_ID}`}
         onReady={initializeMap}
       />
       <div id={mapId} style={{ width: "100%", height: "100%" }} />

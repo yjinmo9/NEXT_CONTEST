@@ -209,6 +209,29 @@ export const postAction = async (formData: FormData): Promise<void> => {
 };
 
 
+export const getNewListAction = async () => {
+  await fetchAndStoreNews(); // 새로운 뉴스 데이터 가져와서 저장
+  
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('news')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('뉴스 조회 에러:', error);
+    return [];
+  }
+
+  return data.map(item => ({
+    ...item,
+    created_at: formatRelativeTimeKST(item.created_at)
+
+  }));
+};
+
+
 // 🔁 교체용: 실제 Supabase에서 reports 테이블에서 데이터 fetch + distance_m 포함
 export const getMyReportsAction = async () => {
   const supabase = await createClient();
