@@ -7,10 +7,12 @@ export default function ImageInput({
   className,
   w,
   h,
+  setUploadingStatus,
 }: {
   className: string;
   w: number;
   h: number;
+  setUploadingStatus: (status:boolean) => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -25,7 +27,8 @@ export default function ImageInput({
 
     setFile(selected);
     setPreview(URL.createObjectURL(selected));
-
+    setUploadingStatus(false)
+    
     try {
       const formData = new FormData();
       formData.append("file", selected);
@@ -43,7 +46,8 @@ export default function ImageInput({
       }
 
       console.log("✅ 업로드 성공! URL:", result.url);
-      setImageUrls([result.url]); // ✅ 배열에 담기
+      setImageUrls([result.url]);
+      setUploadingStatus(true)
     } catch (error) {
       console.error("❌ 예외 발생:", error);
     }

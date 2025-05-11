@@ -6,7 +6,7 @@ interface Report {
   id: number;
   title: string;
   created_at: string;
-  image: string | null;
+  media_urls: string[];
   status: 'pending' | 'completed';
 }
 
@@ -29,9 +29,10 @@ export function ReportSection({ reports, isLoading }: ReportSectionProps) {
             reports.map((report) => (
               <div key={report.id} className="flex gap-[10px]">
                 <div className="w-[70px] h-[70px] bg-gray-200 rounded-[6px] overflow-hidden">
-                  {report.image && (
+                  {report.media_urls
+                  ?.[0] && (
                     <Image 
-                      src={report.image} 
+                      src={ report.media_urls[0]} 
                       alt="제보 이미지" 
                       width={70} 
                       height={70} 

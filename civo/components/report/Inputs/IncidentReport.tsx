@@ -13,6 +13,7 @@ export default function IncidentInput() {
     const [selected, setSelected] = useState<string | null>(null);
     const [loc, setLoc] = useState<Coordinates>([37.58, 127.02]);
     const [userloc, setUserloc] = useState<Coordinates>([0, 0]);
+    const [uploadingStatus, setUploadingStatus] = useState<boolean>(false);
 
     const handleLocationChange = ({ loc, locStr }: { loc: Coordinates, locStr: string }) => {
         setLoc(loc)
@@ -63,7 +64,7 @@ export default function IncidentInput() {
                 <div id="사진/영상">
                     <Label htmlFor="file-upload" className="font-semibold text-[15px]">사진 · 영상 <span className="text-red-700">*</span></Label>
                     <p className="mt-[12px] text-description text-[15px]">사고를 파악할 수 있는 사진/영상을 업로드해 주세요.</p>
-                    <ImageInput className="mt-[10px] flex gap-4" w={126} h={126}/>
+                    <ImageInput className="mt-[10px] flex gap-4" w={126} h={126} setUploadingStatus={setUploadingStatus}/>
                 </div>
                 <div id="사고 내용" className="flex flex-col">
                     <Label htmlFor="content" className="font-semibold text-[15px]">사고 내용</Label>
@@ -75,7 +76,10 @@ export default function IncidentInput() {
                 <input type="hidden" name="user_lng" value={typeof userloc?.[0] === 'number' ? userloc[0] : ''} />
                 <input type="hidden" name="user_lat" value={typeof userloc?.[1] === 'number' ? userloc[1] : ''} />
 
-                <SubmitButton pendingText="제출 중..." formAction={postAction} className="h-[53px]">
+                <SubmitButton pendingText="제출 중..." formAction={postAction} className={`h-[53px] rounded-[10px] w-full text-sm font-semibold transition ${uploadingStatus
+                        ? "bg-black text-white"
+                        : "bg-gray-300 text-black cursor-not-allowed"
+                        }`}>
                     신고하기
                 </SubmitButton>
             </div>

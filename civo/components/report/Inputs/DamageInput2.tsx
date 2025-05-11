@@ -12,6 +12,7 @@ export default function DamageInput2() {
   const { data } = useDamageForm();
 
   const [userloc, setUserloc] = useState<Coordinates | null>(null);
+  const [uploadingStatus, setUploadingStatus] = useState<boolean>(false);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition((position) => {
@@ -37,6 +38,7 @@ export default function DamageInput2() {
             className="mt-[10px] flex flex-col gap-4 items-center"
             w={362}
             h={365}
+            setUploadingStatus={setUploadingStatus}
           />
         </div>
 
@@ -56,7 +58,10 @@ export default function DamageInput2() {
         <SubmitButton
           formAction={postAction}
           pendingText="제출 중..."
-          className="h-[53px] bg-black text-white rounded-[10px]"
+          className={`h-[53px] rounded-[10px] w-full text-sm font-semibold transition ${uploadingStatus
+                        ? "bg-black text-white"
+                        : "bg-gray-300 text-black cursor-not-allowed"
+                        }`}
         >
           신고하기
         </SubmitButton>

@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     'https://192.168.219.106:3000',
     'https://192.168.0.43:3000'
   ],
+  images: {
+    domains: ['fionhhnbcfygydxzuoqw.supabase.co'],
+  },
 };
 
 export default nextConfig;
