@@ -13,11 +13,7 @@ export const signUpAction = async (formData: FormData) => {
   const origin = (await headers()).get("origin");
 
   if (!email || !password) {
-    return encodedRedirect(
-      "error",
-      "/sign-up",
-      "Email and password are required",
-    );
+    return encodedRedirect("error", "/sign-up", "이메일과 비밀번호를 입력해주세요.");
   }
 
   const { error } = await supabase.auth.signUp({
@@ -29,20 +25,24 @@ export const signUpAction = async (formData: FormData) => {
   });
 
   if (error) {
-    console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
-  } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
-    );
   }
+
+  return encodedRedirect(
+    "success",
+    "/sign-up",
+    "가입이 완료되었습니다. 이메일을 확인해주세요."
+  );
 };
 
 export const signInAction = async (formData: FormData) => {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const email = formData.get("email")?.toString() ?? "";
+  const password = formData.get("password")?.toString() ?? "";
+
+  if (!email || !password) {
+    return encodedRedirect("error", "/sign-in", "이메일과 비밀번호를 입력해주세요.");
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -61,10 +61,9 @@ export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
-  const callbackUrl = formData.get("callbackUrl")?.toString();
 
   if (!email) {
-    return encodedRedirect("error", "/forgot-password", "Email is required");
+    return encodedRedirect("error", "/forgot-password", "이메일을 입력해주세요.");
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -72,60 +71,39 @@ export const forgotPasswordAction = async (formData: FormData) => {
   });
 
   if (error) {
-    console.error(error.message);
-    return encodedRedirect(
-      "error",
-      "/forgot-password",
-      "Could not reset password",
-    );
-  }
-
-  if (callbackUrl) {
-    return redirect(callbackUrl);
+    return encodedRedirect("error", "/forgot-password", error.message);
   }
 
   return encodedRedirect(
     "success",
     "/forgot-password",
-    "Check your email for a link to reset your password.",
+    "비밀번호 재설정 링크가 이메일로 전송되었습니다."
   );
 };
 
 export const resetPasswordAction = async (formData: FormData) => {
   const supabase = await createClient();
 
-  const password = formData.get("password") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
+  const password = formData.get("password")?.toString();
+  const confirmPassword = formData.get("confirmPassword")?.toString();
 
   if (!password || !confirmPassword) {
-    encodedRedirect(
-      "error",
-      "/protected/reset-password",
-      "Password and confirm password are required",
-    );
+    return encodedRedirect("error", "/protected/reset-password", "비밀번호를 모두 입력해주세요.");
   }
 
   if (password !== confirmPassword) {
-    encodedRedirect(
-      "error",
-      "/protected/reset-password",
-      "Passwords do not match",
-    );
+    return encodedRedirect("error", "/protected/reset-password", "비밀번호가 일치하지 않습니다.");
   }
 
   const { error } = await supabase.auth.updateUser({
-    password: password,
+    password,
   });
 
   if (error) {
-    encodedRedirect(
-      "error",
-      "/protected/reset-password",
-      "Password update failed",
-    );
+    return encodedRedirect("error", "/protected/reset-password", error.message);
   }
 
-  encodedRedirect("success", "/protected/reset-password", "Password updated");
+  return encodedRedirect("success", "/protected/reset-password", "비밀번호가 변경되었습니다.");
 };
 
 export const signOutAction = async () => {
@@ -196,7 +174,13 @@ export const postAction = async (formData: FormData): Promise<void> => {
       status: "pending",
       missing_name: missingName,
       missing_age: missingAge,
-      missing_gender: missingGender
+      missing_gender: missingGender,
+
+
+        // ✅ 추가!
+      missing_lat: parseFloat(formData.get("missing_lat") as string) || null,
+      missing_lng: parseFloat(formData.get("missing_lng") as string) || null,
+
     }]);
 
   if (error) {

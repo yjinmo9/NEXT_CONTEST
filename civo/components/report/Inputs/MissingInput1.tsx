@@ -24,9 +24,18 @@ export default function MissingInput1() {
     const [loc, setLoc] = useState<Coordinates | null>(null);
 
     const handleLocationChange = ({ loc, locStr }: { loc: Coordinates, locStr: string }) => {
-        setLocStr(locStr)
-        setLoc(loc)
-    }
+        setLocStr(locStr);
+        setLoc(loc);
+      
+        // 🔥 missing_lat, missing_lng 저장
+        setData({
+          ...data,
+          missing_lat: loc[1],  // 위도
+          missing_lng: loc[0],  // 경도
+        });
+      };
+
+    
     const initLocation = () => {
         navigator.geolocation.getCurrentPosition((position) => {
             setLoc([position.coords.longitude, position.coords.latitude]);

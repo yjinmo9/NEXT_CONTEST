@@ -1,9 +1,14 @@
+'use client';
+
 export type Message =
   | { success: string }
   | { error: string }
-  | { message: string };
+  | { message: string }
+  | null;
 
 export function FormMessage({ message }: { message: Message }) {
+  if (!message) return null;
+
   return (
     <div className="flex flex-col gap-2 w-full max-w-md text-sm">
       {"success" in message && (
@@ -17,8 +22,11 @@ export function FormMessage({ message }: { message: Message }) {
         </div>
       )}
       {"message" in message && (
-        <div className="text-foreground border-l-2 px-4">{message.message}</div>
+        <div className="text-foreground border-l-2 px-4">
+          {message.message}
+        </div>
       )}
     </div>
   );
 }
+

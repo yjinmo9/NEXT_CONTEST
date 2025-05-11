@@ -5,9 +5,11 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 
 type MissingFormData = {
   name: string;
-  gender: string;
   age: number;
+  gender: string;
   content: string;
+  missing_lat?: number;
+  missing_lng?: number;
 };
 
 type MissingFormContextType = {
@@ -20,9 +22,11 @@ const MissingFormContext = createContext<MissingFormContextType | undefined>(und
 export function MissingFormProvider({ children }: { children: ReactNode }) {
   const [data, setDataState] = useState<MissingFormData>({
     name: '',
-    gender: '',
     age: 0,
+    gender: '',
     content: '',
+    missing_lat: 0,
+    missing_lng: 0,
   });
 
   const setData = (partial: Partial<MissingFormData>) => {
