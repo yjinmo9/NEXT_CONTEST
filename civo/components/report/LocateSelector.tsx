@@ -14,7 +14,7 @@ interface AddressSuggestion {
 }
 
 
-export default function LocateSelector({ onLocateChange }: { onLocateChange?: ({ loc, locStr }: { loc: Coordinates, locStr: string }) => void }) {
+export default function LocateSelector({ onLocateChange, name = "사고 위치 " }: { onLocateChange?: ({ loc, locStr }: { loc: Coordinates, locStr: string }) => void , name?:string}) {
     const [query, setQuery] = useState<string>('');
     const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -152,7 +152,7 @@ export default function LocateSelector({ onLocateChange }: { onLocateChange?: ({
             </div>
         )}
         <div id="사고 위치">
-            <Label htmlFor="locate" className="font-semibold text-[15px]">사고 위치 <span className="text-red-700">*</span></Label>
+            <Label htmlFor="locate" className="font-semibold text-[15px]">{name} <span className="text-red-700">*</span></Label>
             <div className={`py-[8px] mt-[12px] border rounded-[10px] border-formborder flex flex-col justify-center px-4 gap-[10px] ${locate ? "text-black" : "text-description"}`}>
                 {locate ? (
                     <span>{locate}</span>
