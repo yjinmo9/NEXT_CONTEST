@@ -15,7 +15,7 @@ export default function DamageInput2() {
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition((position) => {
-      setUserloc([position.coords.longitude, position.coords.latitude]);
+      setUserloc([position.coords.latitude, position.coords.longitude]);
     });
   }, []);
 
@@ -46,8 +46,8 @@ export default function DamageInput2() {
         <input type="hidden" name="type" value="damage" />
         <input type="hidden" name="category" value="기물파손" />
 
-        <input type="hidden" name="user_lat" value={userloc?.[1] ?? ''} />
-        <input type="hidden" name="user_lng" value={userloc?.[0] ?? ''} />
+        <input type="hidden" name="user_lat" value={userloc?.[0] ?? ''} />
+        <input type="hidden" name="user_lng" value={userloc?.[1] ?? ''} />
 
         {/* ✅ 빠졌던 부분: 신고 위치 */}
         <input type="hidden" name="report_lat" value={data.report_lat ?? ''} />

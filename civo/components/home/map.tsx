@@ -8,7 +8,7 @@ import Located from "@/src/img/located.png";
 export type NaverMap = naver.maps.Map;
 type Lng = number;
 type Lat = number;
-export type Coordinates = [Lat, Lng];
+export type Coordinates = [Lng, Lat];
 
 const mapId = "naver-map";
 const DEFAULT_COORDINATES: Coordinates = [126.9784147, 37.5666805];

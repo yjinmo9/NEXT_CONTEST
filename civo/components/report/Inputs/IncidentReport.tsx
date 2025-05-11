@@ -11,7 +11,7 @@ import ImageInput from "../ImageInput";
 export default function IncidentInput() {
     const categories = ['화재', '인구밀집', '교통사고', '기타'];
     const [selected, setSelected] = useState<string | null>(null);
-    const [loc, setLoc] = useState<Coordinates>([127.02, 37.58]);
+    const [loc, setLoc] = useState<Coordinates>([37.58, 127.02]);
     const [userloc, setUserloc] = useState<Coordinates>([0, 0]);
 
     const handleLocationChange = ({ loc, locStr }: { loc: Coordinates, locStr: string }) => {
@@ -21,6 +21,7 @@ export default function IncidentInput() {
     const initLocation = () => {
         navigator.geolocation.getCurrentPosition((position) => {
             setUserloc([position.coords.longitude, position.coords.latitude]);
+            setLoc([position.coords.longitude, position.coords.latitude]);
         });
     };
 
@@ -71,8 +72,8 @@ export default function IncidentInput() {
                 <input type="hidden" name="report_lng" value={typeof loc?.[1] === 'number' ? loc[1] : ''} />
                 <input type="hidden" name="report_lat" value={typeof loc?.[0] === 'number' ? loc[0] : ''} />
 
-                <input type="hidden" name="user_lng" value={typeof userloc?.[1] === 'number' ? userloc[1] : ''} />
-                <input type="hidden" name="user_lat" value={typeof userloc?.[0] === 'number' ? userloc[0] : ''} />
+                <input type="hidden" name="user_lng" value={typeof userloc?.[0] === 'number' ? userloc[0] : ''} />
+                <input type="hidden" name="user_lat" value={typeof userloc?.[1] === 'number' ? userloc[1] : ''} />
 
                 <SubmitButton pendingText="제출 중..." formAction={postAction} className="h-[53px]">
                     신고하기

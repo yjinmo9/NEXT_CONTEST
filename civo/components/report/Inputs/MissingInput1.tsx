@@ -7,7 +7,7 @@ import TextareaAutosize from "react-textarea-autosize"
 import { useRouter } from "next/navigation";
 import { useMissingForm } from "@/app/context/MissingFormContext";
 import LocateSelector from "../LocateSelector";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Coordinates } from "@/components/home/map";
 
 export default function MissingInput1() {
@@ -27,7 +27,16 @@ export default function MissingInput1() {
         setLocStr(locStr)
         setLoc(loc)
     }
+    const initLocation = () => {
+        navigator.geolocation.getCurrentPosition((position) => {
+            setLoc([position.coords.longitude, position.coords.latitude]);
+        });
+    };
 
+    useEffect(() => {
+        initLocation();
+    }, []);
+    
     return (
         <form className="flex-1 flex flex-col min-w-64 h-full pointer-events-auto" encType="multipart/form-data">
             <div className="mt-[5px] flex-grow overflow-y-auto min-h-0 flex flex-col gap-[32px]">
@@ -77,13 +86,13 @@ export default function MissingInput1() {
                         입니다.
                     </p>
                 </div>
-                <LocateSelector onLocateChange={handleLocationChange} name="실종 위치 "/>
+                <LocateSelector onLocateChange={handleLocationChange} name="실종 위치 " />
                 <div id="실종 상황" className="flex flex-col">
                     <Label htmlFor="content" className="font-semibold text-[15px]">
                         실종 당시 상황 <span className="text-red-700">*</span>
                     </Label>
                     <TextareaAutosize
-                        className="mt-[12px] min-h-[calc(100vh-600px)] py-[10px] px-[15px] border rounded-[10px] border-formborder placeholder-description"
+                        className="mt-[12px] min-h-[calc(100vh-800px)] py-[10px] px-[15px] border rounded-[10px] border-formborder placeholder-description"
                         name="content"
                         placeholder="실종 당시 상황을 자세하게 입력해주세요"
                         onChange={(e) => setData({ ...data, content: e.target.value })}

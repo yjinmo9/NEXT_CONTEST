@@ -8,7 +8,6 @@ type Lng = number;
 type Lat = number;
 export type Coordinates = [Lng, Lat];
 
-// ✅ 타입 정의 추가
 type NavermapProps = {
   reports: any[]; // 정확한 타입이 있다면 any 대신 정의해도 좋아
 };

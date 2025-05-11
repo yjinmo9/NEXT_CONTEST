@@ -30,6 +30,7 @@ export default function LocateSelector({ onLocateChange, name = "사고 위치 "
     const initLocation = () => {
         navigator.geolocation.getCurrentPosition((position) => {
             setLoc([position.coords.longitude, position.coords.latitude]);
+            onLocateChange?.({loc:[position.coords.longitude, position.coords.latitude], locStr:'불러오는중'});
         });
     };
 
@@ -87,6 +88,7 @@ export default function LocateSelector({ onLocateChange, name = "사고 위치 "
         onLocateChange?.({ loc: selectedLocation, locStr: fullAddr });
         setLocateChoice(false);
     }
+
     const handleSelect = (suggestion: AddressSuggestion) => {
         onLocateChange?.({ loc: suggestion.coordinates, locStr: suggestion.name });
         setShowSuggestions(false);
