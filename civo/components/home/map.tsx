@@ -4,6 +4,10 @@ import Script from "next/script";
 import { useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
 import Located from "@/src/img/located.png";
+import Fire from "@/src/img/fire.png";
+import Mass from "@/src/img/mass.png";
+import CarCrash from "@/src/img/carCrash.png";
+import Etc from "@/src/img/etc.png";
 
 export type NaverMap = naver.maps.Map;
 type Lng = number;
@@ -23,6 +27,7 @@ type Report = {
   category?: string;
 };
 
+
 export default function Map({
   loc = DEFAULT_COORDINATES,
   onReady,
@@ -34,8 +39,10 @@ export default function Map({
   enableRecenterButton?: boolean;
   reports?: Report[];
 }) {
-  const mapRef = useRef<NaverMap>(null);
+  const mapRef = useRef<NaverMap | null>(null);
+  const markersRef = useRef<naver.maps.Marker[]>([]); // 마커 관리
 
+  // ✅ 지도 초기화 (최초 1회)
   const initializeMap = useCallback(() => {
     if (!window.naver?.maps?.LatLng || !loc) return;
 
@@ -53,28 +60,67 @@ export default function Map({
     const map = new window.naver.maps.Map(mapId, mapOptions);
     mapRef.current = map;
 
-    // ✅ reports 기반 마커 추가
+    if (onReady) {
+      onReady(map);
+    }
+  }, [loc, onReady]);
+
+  const getIconUrl = (type: string) => {
+    switch (type) {
+      case "화재": return "img/fire.png";
+      case "인구밀집": return "img/mass.png";
+      case "교통사고": return "img/carCrash.png";
+      default: return "img/etc.png";
+    }
+  };
+
+  // ✅ reports가 바뀔 때마다 마커 동기화
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !Array.isArray(reports)) return;
+
+    // 이전 마커 제거
+    markersRef.current.forEach((marker) => marker.setMap(null));
+    markersRef.current = [];
+
     reports.forEach((report) => {
       const show =
         report.type === "missing" ||
-        (report.distance_m !== undefined && report.distance_m !== null && report.distance_m <= 100);
-    
-      console.log(`📍 ${report.title} 표시 조건:`, show, "좌표:", report.report_lat, report.report_lng);
-    
-      if (show && report.report_lat && report.report_lng) {
+        (typeof report.distance_m === "number" && report.distance_m <= 100);
+
+      const validCoords =
+        report.report_lat != null &&
+        report.report_lng != null &&
+        !isNaN(report.report_lat) &&
+        !isNaN(report.report_lng);
+
+      console.log(
+        `📍 ${report.title} 표시 조건:`,
+        show,
+        "좌표:",
+        report.report_lat,
+        report.report_lng
+      );
+
+      if (show && validCoords) {
         const marker = new naver.maps.Marker({
           position: new naver.maps.LatLng(report.report_lat, report.report_lng),
           map,
           title: report.title || "제보",
+          icon: {
+            url: getIconUrl(report.category || "기타"),
+            size: new naver.maps.Size(36, 36),
+            scaledSize: new naver.maps.Size(36, 36),
+            anchor: new naver.maps.Point(18, 18),
+          }
         });
+
+        markersRef.current.push(marker);
       }
     });
+  }, [reports]);
 
-    if (onReady) {
-      onReady(map);
-    }
-  }, [loc, onReady, reports]);
-
+  // ✅ 현위치로 지도 이동
   const recenter = () => {
     if (!navigator.geolocation || !mapRef.current) return;
 
@@ -95,11 +141,14 @@ export default function Map({
       />
       <div id={mapId} style={{ width: "100%", height: "100%" }} />
       {enableRecenterButton && (
-        <button type="button" onClick={recenter} className="fixed top-[20vh] right-[5vw]">
+        <button
+          type="button"
+          onClick={recenter}
+          className="fixed top-[20vh] right-[5vw]"
+        >
           <Image src={Located} alt="현위치" width={40} height={40} />
         </button>
       )}
     </>
   );
 }
-
