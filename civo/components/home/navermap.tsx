@@ -33,7 +33,6 @@ export default function Navermap({ reports }: NavermapProps) {
   return (
     <div className="w-full h-full">
       <Map loc={loc} reports={reports} />
-      <p>지도 여기에 표시됨 (제보 수: {reports.length})</p>
     </div>
   );
 }
