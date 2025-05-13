@@ -21,11 +21,11 @@ export default function Signup() {
 
   return (
     <>
-      <form className="flex flex-col min-w-64 max-w-64 mx-auto">
+      <form className="flex flex-col w-full px-[20px] mt-[70px] gap-[24px]">
         <h1 className="text-2xl font-medium">CIVO에 오신걸 환영합니다.</h1>
         <p className="text-sm text-foreground">서비스 이용을 위해 회원가입 해주세요.</p>
 
-        <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
+        <div className="flex flex-col gap-2 [&>input]:mb-3">
           <Label>Email</Label>
           <Input name="email" placeholder="Example@email.com" required />
 

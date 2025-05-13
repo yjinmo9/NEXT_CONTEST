@@ -4,7 +4,7 @@ import Image from "next/image";
 
 
 
-export function ProfileSection() {
+export function ProfileSection({name}: {name?: string}) {
   return (
     <div className="px-[20px] py-[16px]">
       <h1 className="text-[15px] font-semibold mb-[12px]">내 정보</h1>
@@ -19,7 +19,7 @@ export function ProfileSection() {
           />
         </div>
         <div>
-          <p className="text-[15px] font-medium">양진모</p>
+          <p className="text-[15px] font-medium">{name}</p>
           <button className="text-[13px] text-gray-500 mt-[2px]">
             프로필 수정하기
           </button>

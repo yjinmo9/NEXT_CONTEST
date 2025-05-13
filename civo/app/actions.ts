@@ -1,10 +1,33 @@
 "use server";
 
 import { encodedRedirect } from "@/utils/utils";
-import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { fetchAndStoreNews,formatRelativeTimeKST } from "@/lib/newsCrawler";
+import { fetchAndStoreNews, formatRelativeTimeKST } from "@/lib/newsCrawler";
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
+
+
+export const createClient = async () => {
+  const cookieStore = await cookies(); // ✅ 동기 함수
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (all) => {
+          all.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, {
+              ...options,
+              secure: true, // ✅ HTTPS 환경에서는 반드시 필요
+            });
+          });
+        },
+      },
+    }
+  );
+};
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -30,7 +53,7 @@ export const signUpAction = async (formData: FormData) => {
 
   return encodedRedirect(
     "success",
-    "/sign-up",
+    "/sign-in",
     "가입이 완료되었습니다. 이메일을 확인해주세요."
   );
 };
@@ -54,7 +77,7 @@ export const signInAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-in", error.message);
   }
 
-  return redirect("/protected");
+  return redirect("/home");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
@@ -123,6 +146,7 @@ export const postAction = async (formData: FormData): Promise<void> => {
   if (type === "missing") {
     category = "missing";
   }
+  const user_id = (await headers()).get("x-user-id");
 
   const mediaUrls = formData.getAll("media_urls").map((url) => url.toString());
 
@@ -163,6 +187,7 @@ export const postAction = async (formData: FormData): Promise<void> => {
     .insert([{
       title,
       content,
+      user_id,
       type,
       category,
       media_urls: mediaUrls,
@@ -176,8 +201,7 @@ export const postAction = async (formData: FormData): Promise<void> => {
       missing_age: missingAge,
       missing_gender: missingGender,
 
-
-        // ✅ 추가!
+      // ✅ 추가!
       missing_lat: parseFloat(formData.get("missing_lat") as string) || null,
       missing_lng: parseFloat(formData.get("missing_lng") as string) || null,
 
@@ -195,7 +219,7 @@ export const postAction = async (formData: FormData): Promise<void> => {
 
 export const getNewListAction = async () => {
   await fetchAndStoreNews(); // 새로운 뉴스 데이터 가져와서 저장
-  
+
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -272,3 +296,13 @@ export const getReportsForMap = async () => {
   return filtered;
 };
 
+export const getUserIdAction = async () => {
+  const requestHeaders = await headers();
+  const userId = requestHeaders.get("x-user-id");
+  if (!userId) {  
+    console.error("❌ 사용자 ID가 없습니다.");
+    return null;
+  } 
+  console.log("✅ 사용자 ID:", userId);
+  return userId;
+};

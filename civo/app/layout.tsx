@@ -38,7 +38,7 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body className="max-w-[420px] w-full h-screen mx-auto flex flex-col">
+      <body className="max-w-[420px] max-w-screen h-screen mx-auto flex flex-col">
       <main className="relative z-10 mt-[92.65px] flex-grow min-h-0">{children}</main>
       <Header />
       <Footer/>

@@ -2,32 +2,29 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export const createClient = async () => {
-  const cookieStore = cookies(); // get cookie context
+  const cookieStore = await cookies(); // ✅ 동기적으로 쿠키 객체 가져옴
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // 환경변수가 설정되지 않았을 경우 에러 발생
   if (!url || !key) {
     throw new Error("Supabase URL이나 Key가 설정되지 않았습니다.");
   }
 
-  // Supabase 클라이언트 생성
   return createServerClient(url, key, {
     cookies: {
-      async getAll() {
-        return (await cookieStore).getAll();
+      getAll() {
+        return cookieStore.getAll(); // ✅ 여기선 await 쓰지 마세요
       },
       setAll(cookiesToSet) {
         try {
-          cookiesToSet.forEach(async ({ name, value, options }) => {
-            (await cookieStore).set(name, value, options);
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options); // ✅ await 제거
           });
         } catch (error) {
-          // Server Component에서는 무시 가능
+          // 무시 가능
         }
       },
     },
   });
 };
-

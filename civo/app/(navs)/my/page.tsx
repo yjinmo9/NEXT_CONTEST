@@ -5,24 +5,27 @@ import { ReputationSection } from "@/components/my/reputation-section";
 import { ReportSection } from "@/components/my/report-section";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
+import { getUserIdAction } from "@/app/actions";
 
 export default function MyPage() {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClientComponentClient();
+  const [user_id, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchReports() {
       try {
         setLoading(true);
 
-        // ✅ 하드코딩된 사용자 ID (테스트용)
-        const user_id = "acd6115e-8c87-4b74-a9f4-311eeb7aa62e";
+        const user_id = await getUserIdAction();
+        setUserId(user_id);
+        console.log("🔥 현재 사용자 ID:", user_id);
 
-        // ✅ Supabase에서 해당 user_id의 제보 기록 조회
         const { data, error } = await supabase
           .from("reports")
           .select("*")
+          .eq("user_id", user_id)
           .order("created_at", { ascending: false });
 
         if (error) {
@@ -52,7 +55,7 @@ export default function MyPage() {
 
   return (
     <div className="w-full z-30 bg-white min-h-screen">
-      <ProfileSection />
+      <ProfileSection name={user_id || "이름이 없습니다."}/>
       <ReputationSection />
       <ReportSection reports={reports} isLoading={loading} />
     </div>
