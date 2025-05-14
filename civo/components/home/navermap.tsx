@@ -8,12 +8,16 @@ type Lng = number;
 type Lat = number;
 export type Coordinates = [Lng, Lat];
 
-type NavermapProps = {
-  reports: any[]; // 정확한 타입이 있다면 any 대신 정의해도 좋아
+type Cluster = {
+  cluster_id: number;
+  count: number;
+  center: { lat: number; lng: number };
+  points: { lat: number; lng: number }[];
 };
 
-export default function Navermap({ reports }: NavermapProps) {
+export default function Navermap() {
   const [loc, setLoc] = useState<Coordinates | null>(null);
+  const [clusters, setClusters] = useState<Cluster[]>([]);
 
   const initLocation = () => {
     navigator.geolocation.getCurrentPosition((position) => {
@@ -25,14 +29,28 @@ export default function Navermap({ reports }: NavermapProps) {
     initLocation();
   }, []);
 
-  if (!loc) return <p className="text-sm">⏳ 위치 정보 가져오는 중...</p>;
+  const handleMapReady = async (map: naver.maps.Map) => {
+    const updateClusters = async () => {
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      const lat = center.y;
+      const lng = center.x;
 
-  // 디버깅 출력
-  console.log("🗺️ 전달받은 reports:", reports);
+      const res = await fetch(`/api/report/cluster?lat=${lat}&lng=${lng}&zoom=${zoom}`);
+      const data = await res.json();
+      setClusters(data);
+    };
+
+    // 줌/이동 후 멈췄을 때 호출
+    naver.maps.Event.addListener(map, "idle", updateClusters);
+    updateClusters(); // 초기 1회
+  };
+
+  if (!loc) return <p className="text-sm">⏳ 위치 정보 가져오는 중...</p>;
 
   return (
     <div className="w-full h-full">
-      <Map loc={loc} reports={reports} />
+      <Map loc={loc} reports={clusters} onReady={handleMapReady} />
     </div>
   );
 }
