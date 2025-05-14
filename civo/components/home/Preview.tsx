@@ -1,4 +1,6 @@
 import Link from "next/link";
+import reportImg from '@/src/img/reporter.png';
+import Image from "next/image";
 
 type Report = {
     id?: string;
@@ -15,17 +17,32 @@ type Report = {
 };
 
 export default function Preview({ report }: { report: Report }) {
+    const userName = "익명";
     return (
-        <div className="bg-white h-[229px] rounded-2xl shadow-lg pointer-events-auto p-4 max-w-md mx-auto drop-shadow-[0_0px_6px_rgba(0,0,0,0.15)]">
-            <div className="flex gap-4">
-                <Link href={`/home/${report.id}`} className="w-1/2 h-full rounded-xl object-cover cursor-pointer">
+        <div className="bg-white max-h-[228px] overflow-hidden rounded-2xl shadow-lg pointer-events-auto max-w-md mx-auto drop-shadow-[0_0px_6px_rgba(0,0,0,0.15)]">
+            <div className="flex">
+                <Link
+                    href={`/home/${userName}`}
+                    className="w-[50vh] aspect-[3/4] h-full overflow-hidden rounded-l-xl cursor-pointer"
+                >
                     <img
                         src={report.media_urls?.[0] || "/placeholder.png"}
                         alt="썸네일"
-                        className="w-full h-full rounded-xl object-cover"
+                        className="w-full h-full object-cover object-center"
                     />
+                    <div className="flex gap-[4px] absolute bottom-[10px] left-[80px] justify-center items-center">
+                    <Image
+                        src={reportImg}
+                        alt="신고 아이콘"
+                        width={10}
+                        height={10}
+                        className="h-[10px] opacity-100"/>
+                    <div className="text-white text-[11px] font-semibold">{userName}</div>
+                    {/*여기 조회수*/}
+                    </div>
+
                 </Link>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 p-4">
                     <div className="flex items-center gap-2">
                         <img
                             src={"/img/mypage.png"}
@@ -35,8 +52,8 @@ export default function Preview({ report }: { report: Report }) {
                         <p className="text-sm font-semibold">{report.user_id || "익명"}</p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500">{report.category || "기타"} | {report.title}</p>
-                        <p className="text-xs text-gray-400">{report.created_at || "날짜 없음"}</p>
+                        <p className="text-[11px] font-semibold">{report.title}</p>
+                        <p className="text-[8px]">{report.created_at || "날짜 없음"}</p>
                     </div>
                     <p className="text-xs text-gray-700 mt-1 line-clamp-2">{report.content || "설명이 없습니다."}</p>
                 </div>
