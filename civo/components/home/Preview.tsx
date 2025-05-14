@@ -16,13 +16,13 @@ type Report = {
     user_id?: string;
 };
 
-export default function Preview({ report }: { report: Report }) {
-    const userName = "익명";
+export default function Preview({ report, handleClose }: { report: Report, handleClose: (report:null) => void }) {
+    const userName = report.user_id || "익명";
     return (
         <div className="bg-white max-h-[228px] overflow-hidden rounded-2xl shadow-lg pointer-events-auto max-w-md mx-auto drop-shadow-[0_0px_6px_rgba(0,0,0,0.15)]">
             <div className="flex">
                 <Link
-                    href={`/home/${userName}`}
+                    href={`/home/${report.id}`}
                     className="w-[50vh] aspect-[3/4] h-full overflow-hidden rounded-l-xl cursor-pointer"
                 >
                     <img
@@ -58,7 +58,7 @@ export default function Preview({ report }: { report: Report }) {
                     <p className="text-xs text-gray-700 mt-1 line-clamp-2">{report.content || "설명이 없습니다."}</p>
                 </div>
             </div>
-            <div className="absolute top-0 right-[10px] text-gray-500">×</div>
+            <button className="absolute top-0 right-[10px] text-gray-500" onClick={() => handleClose(null)}>×</button>
         </div>
     );
 }

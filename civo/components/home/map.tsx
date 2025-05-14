@@ -129,7 +129,7 @@ useEffect(() => {
           console.log("📦 report 데이터:", report);
     
           setSelectedReport(report);
-          
+
         } catch (err) {
           console.error("❌ 클러스터 대표 제보 불러오기 실패", err);
         }
@@ -174,7 +174,7 @@ return (
 
     {selectedReport && (
       <div className="fixed bottom-[12vh] w-full z-50 px-4 pb-4 pointer-events-none">
-        <Preview report={selectedReport} />
+        <Preview report={selectedReport} handleClose={setSelectedReport}/>
       </div>
     )}
   </>

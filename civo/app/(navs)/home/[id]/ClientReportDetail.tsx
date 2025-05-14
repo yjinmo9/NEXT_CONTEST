@@ -47,28 +47,26 @@ export default function ClientReportDetail({ id }: { id: string }) {
   if (!report) return <p className="p-4">데이터가 없습니다.</p>;
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
-      <h1 className="text-xl font-bold mb-2">{report.title}</h1>
-      <p className="text-sm text-gray-500">{report.created_at}</p>
-      <p className="text-sm text-gray-600 mb-4">{report.category}</p>
-
+    <div className="w-full min-h-screen mx-auto">
       {report.media_urls?.[0] && (
         <img
           src={report.media_urls[0]}
           alt="미디어"
-          className="w-full h-auto rounded-lg mb-4 object-cover"
+          className="aspect-[3/4] w-full h-auto mb-4 object-cover"
         />
       )}
-
-      <p className="text-base text-gray-800 whitespace-pre-wrap">{report.content}</p>
-
-      <div className="mt-6">
-        <button
-          onClick={() => router.push("/home")}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          목록으로 돌아가기
-        </button>
+      <div className="flex flex-col px-4">
+      <div className="flex items-center gap-2 mb-4">
+        <img
+          src={"/img/mypage.png"}
+          alt="프로필"
+          className="w-[30px] h-[30px] rounded-full object-cover"
+        />
+        <p className="text-sm font-semibold">{report.user_id || "익명"}</p>
+      </div>
+      <div className="font-semibold text-[17px]">{report.title}</div>
+      <div className="text-[12px] text-gray-400 mb-2">{report.created_at || "날짜 없음"}</div>
+      <p className="text-[13px] whitespace-pre-wrap">{report.content}</p>
       </div>
     </div>
   );
