@@ -58,6 +58,7 @@ export default function Preview({ report }: { report: Report }) {
                     <p className="text-xs text-gray-700 mt-1 line-clamp-2">{report.content || "설명이 없습니다."}</p>
                 </div>
             </div>
+            <div className="absolute top-0 right-[10px] text-gray-500">×</div>
         </div>
     );
 }
