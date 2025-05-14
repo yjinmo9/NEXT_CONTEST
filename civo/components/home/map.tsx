@@ -19,6 +19,20 @@ type Cluster = {
   count: number;
   center: { lat: number; lng: number };
   points: { lat: number; lng: number }[];
+
+type Report = {
+  id?: string;
+  type: string;
+  report_lat: number;
+  report_lng: number;
+  distance_m?: number | null;
+  title?: string;
+  category?: string;
+  media_urls?: string[];
+  created_at?: string;
+  content?: string;
+  missing_lat?: number;
+  missing_lng?: number;
 };
 
 export default function Map({
@@ -133,6 +147,7 @@ export default function Map({
       });
 
       markersRef.current.push(marker);
+
     });
   }, [reports]);
 

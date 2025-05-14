@@ -30,8 +30,8 @@ export default function MissingInput1() {
         // 🔥 missing_lat, missing_lng 저장
         setData({
           ...data,
-          missing_lat: loc[1],  // 위도
-          missing_lng: loc[0],  // 경도
+          missing_lat: loc[0],  // 위도
+          missing_lng: loc[1],  // 경도
         });
       };
 
