@@ -168,7 +168,7 @@ export default function Map({
         </button>
       )}
       {selectedReport && (
-        <div className="fixed bottom-[10vh] w-full mb-100 z-50 px-4 pb-4 pointer-events-none">
+        <div className="fixed bottom-[12vh] w-full z-50 px-4 pb-4 pointer-events-none">
           <Preview report={selectedReport} />
         </div>
       )}
