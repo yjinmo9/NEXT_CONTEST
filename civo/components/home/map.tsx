@@ -18,22 +18,9 @@ type Cluster = {
   cluster_id: number;
   count: number;
   center: { lat: number; lng: number };
-  points: { lat: number; lng: number }[];
-}
-
-type Report = {
-  id?: string;
-  type: string;
-  report_lat: number;
-  report_lng: number;
-  distance_m?: number | null;
-  title?: string;
-  category?: string;
-  media_urls?: string[];
-  created_at?: string;
-  content?: string;
-  missing_lat?: number;
-  missing_lng?: number;
+  points: {
+    lat: number; lng: number;
+}[];
 };
 
 export default function Map({
@@ -74,120 +61,125 @@ export default function Map({
     }
   }, [loc, onReady]);
 
-  // ✅ 마커 렌더링
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !Array.isArray(reports)) return;
+// ✅ 마커 렌더링
+useEffect(() => {
+  if (!Array.isArray(reports)) return;
 
-    // 기존 마커 제거
-    markersRef.current.forEach((marker) => marker.setMap(null));
-    markersRef.current = [];
+  const map = mapRef.current;
+  if (!map) return;
 
-    reports.forEach((cluster) => {
-      const isSingle = cluster.count === 1;
+  // 기존 마커 제거
+  markersRef.current.forEach((marker) => marker.setMap(null));
+  markersRef.current = [];
 
-      // ✅ 단일 제보는 정확한 좌표 사용
-      const latlng = isSingle
-        ? new naver.maps.LatLng(cluster.points[0].lat, cluster.points[0].lng)
-        : new naver.maps.LatLng(cluster.center.lat, cluster.center.lng);
+  reports.forEach((cluster) => {
+    const isSingle = cluster.count === 1;
+    const hasPoint = Array.isArray(cluster.points) && cluster.points.length > 0;
 
-      const marker = new naver.maps.Marker({
-        map,
-        position: latlng,
-        icon: isSingle
-          ? undefined // ✅ 기본 마커
-          : {
-              content: `
-                <div style="
-                  background-color: #dc2626;
-                  color: white;
-                  width: 32px;
-                  height: 32px;
-                  border-radius: 50%;
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  font-size: 12px;
-                  font-weight: bold;
-                  box-shadow: 0 0 6px rgba(0,0,0,0.3);
-                ">
-                  ${cluster.count}
-                </div>
-              `,
-              anchor: new naver.maps.Point(16, 16),
-            },
-      });
 
-      // ✅ 클릭 시 Preview 연결
-      naver.maps.Event.addListener(marker, "click", () => {
-        map.setZoom(isSingle ? 17 : map.getZoom());
-        map.panTo(latlng);
+    const latlng = isSingle && hasPoint
+      ? new naver.maps.LatLng(cluster.points[0].lat, cluster.points[0].lng)
+      : new naver.maps.LatLng(cluster.center.lat, cluster.center.lng);
 
-        if (isSingle) {
-          const p = cluster.points[0];
+    const marker = new naver.maps.Marker({
+      map,
+      position: latlng,
+      icon: isSingle
+        ? undefined
+        : {
+            content: `
+              <div style="
+                background-color: #dc2626;
+                color: white;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 12px;
+                font-weight: bold;
+                box-shadow: 0 0 6px rgba(0,0,0,0.3);
+              ">
+                ${cluster.count}
+              </div>
+            `,
+            anchor: new naver.maps.Point(16, 16),
+          },
+    });
+
+    naver.maps.Event.addListener(marker, "click", async () => {
+      map.setZoom(isSingle ? 17 : map.getZoom());
+      map.panTo(latlng);
+    
+      if (isSingle && hasPoint) {
+        const p = cluster.points[0];
+        setSelectedReport({
+          ...p,
+          title: "단일 제보",
+          category: "기타",
+        });
+      } else {
+        // ✅ 클러스터 중심 좌표로 대표 제보 fetch
+        try {
+          const res = await fetch(`/api/report/cluster-report?lat=${cluster.center.lat}&lng=${cluster.center.lng}`);
+          const report = await res.json();
+
+             // 📌 클러스터 정보 로그
+          console.log("📦 report 데이터:", report);
+    
           setSelectedReport({
-            id: cluster.cluster_id.toString(),
-            type: "report",
-            report_lat: p.lat,
-            report_lng: p.lng,
-            title: "단일 제보",
-            category: "기타",
-            content: "이 위치에 하나의 제보가 있습니다.",
-          });
-        } else {
-          setSelectedReport({
-            id: cluster.cluster_id.toString(),
-            type: "cluster",
-            report_lat: cluster.center.lat,
-            report_lng: cluster.center.lng,
-            title: `${cluster.count}건`,
+            ...report,
+            title: `${cluster.count}건 중 하나`,
             category: "군집",
-            content: `${cluster.count}건의 제보가 근처에 있습니다.`,
           });
+        } catch (err) {
+          console.error("❌ 클러스터 대표 제보 불러오기 실패", err);
         }
-      });
-
-      markersRef.current.push(marker);
-
+      }
     });
-  }, [reports]);
 
-  // ✅ 현위치 이동
-  const recenter = () => {
-    if (!navigator.geolocation || !mapRef.current) return;
+    markersRef.current.push(marker);
+  });
+}, [reports]);
 
-    navigator.geolocation.getCurrentPosition((position) => {
-      const { latitude, longitude } = position.coords;
-      const latlng = new naver.maps.LatLng(latitude, longitude);
-      mapRef.current?.panTo(latlng);
-    });
-  };
 
-  return (
-    <>
-      <Script
-        strategy="afterInteractive"
-        type="text/javascript"
-        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.NEXT_PUBLIC_MAP_CLIENT_ID}`}
-        onReady={initializeMap}
-      />
-      <div id={mapId} style={{ width: "100%", height: "100%" }} />
+// ✅ 현위치 이동
+const recenter = () => {
+  if (!navigator.geolocation || !mapRef.current) return;
 
-      {enableRecenterButton && (
-        <button
-          type="button"
-          onClick={recenter}
-          className="fixed top-[20vh] right-[5vw]"
-        >
-          <Image src={Located} alt="현위치" width={40} height={40} />
-        </button>
-      )}
+  navigator.geolocation.getCurrentPosition((position) => {
+    const { latitude, longitude } = position.coords;
+    const latlng = new naver.maps.LatLng(latitude, longitude);
+    mapRef.current?.panTo(latlng);
+  });
+};
 
-      {selectedReport && (
-        <div className="fixed bottom-[12vh] w-full z-50 px-4 pb-4 pointer-events-none">
-          <Preview report={selectedReport} />
-        </div>
-      )}
-    </>
-  );
+return (
+  <>
+    <Script
+      strategy="afterInteractive"
+      type="text/javascript"
+      src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.NEXT_PUBLIC_MAP_CLIENT_ID}`}
+      onReady={initializeMap}
+    />
+    <div id={mapId} style={{ width: "100%", height: "100%" }} />
+
+    {enableRecenterButton && (
+      <button
+        type="button"
+        onClick={recenter}
+        className="fixed top-[20vh] right-[5vw]"
+      >
+        <Image src={Located} alt="현위치" width={40} height={40} />
+      </button>
+    )}
+
+    {selectedReport && (
+      <div className="fixed bottom-[12vh] w-full z-50 px-4 pb-4 pointer-events-none">
+        <Preview report={selectedReport} />
+      </div>
+    )}
+  </>
+);
 }
