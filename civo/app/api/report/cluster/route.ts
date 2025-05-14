@@ -1,10 +1,9 @@
 import { createClient } from '@/utils/supabase/server';
-import { dbscanClusterReports } from '@/utils/clustering';
 import { NextResponse } from 'next/server';
 
 function getEpsByZoom(zoom: number): number {
-  if (zoom >= 19) return 1 / 6371000;  // 35m
-  if (zoom >= 18) return 80000 / 6371000;  // 50m
+  if (zoom >= 19) return 1 / 6371000; // 35m
+  if (zoom >= 18) return 80000 / 6371000;
   if (zoom >= 17) return 400000 / 6371000;
   if (zoom >= 16) return 800000 / 6371000;
   if (zoom >= 15) return 1000000 / 6371000;
@@ -14,82 +13,6 @@ function getEpsByZoom(zoom: number): number {
   return 100000000 / 6371000;
 }
 
-export async function GET(req: Request) {
-  const supabase = await createClient();
-  const { searchParams } = new URL(req.url);
-
-  const lat = parseFloat(searchParams.get('lat') || '0');
-  const lng = parseFloat(searchParams.get('lng') || '0');
-  const zoom = parseInt(searchParams.get('zoom') || '15', 10);
-
-  const { data, error } = await supabase
-    .from('reports')
-    .select('type, report_lat, report_lng, missing_lat, missing_lng, distance_m');
-
-  if (error) {
-    console.error('❌ Supabase fetch error:', error);
-    return NextResponse.json({ error }, { status: 500 });
-  }
-
-  const filtered = data
-    .filter((item) => {
-      if (item.type === 'missing') return item.missing_lat && item.missing_lng;
-      if (['incident', 'damage'].includes(item.type)) return item.distance_m <= 100;
-      return false;
-    })
-    .map((item) => ({
-      lat: item.type === 'missing' ? item.missing_lat : item.report_lat,
-      lng: item.type === 'missing' ? item.missing_lng : item.report_lng,
-    }));
-
-  const eps = getEpsByZoom(zoom);
-
-  console.log('📍 요청 중심좌표:', { lat, lng });
-  console.log('🔎 줌레벨:', zoom, '| eps (radian):', eps);
-  console.log('📦 필터링된 위치 개수:', filtered.length);
-
-  // ✅ 클러스터링 실행
-  const dbscan = require('density-clustering').DBSCAN;
-  const clustering = new dbscan();
-
-  const coords = filtered.map((p) => [p.lat, p.lng]);
-  const clustersRaw = clustering.run(coords, eps, 2, haversineDistance);
-  const clusteredIndexes = new Set(clustersRaw.flat());
-
-  const result = clustersRaw.map((cluster: any[], i: any) => {
-    const clusterPoints = cluster.map((idx: string | number) => filtered[idx as number]);
-    const centerLat = clusterPoints.reduce((sum: any, p: { lat: any; }) => sum + p.lat, 0) / clusterPoints.length;
-    const centerLng = clusterPoints.reduce((sum: any, p: { lng: any; }) => sum + p.lng, 0) / clusterPoints.length;
-
-    return {
-      cluster_id: i,
-      count: clusterPoints.length,
-      center: { lat: centerLat, lng: centerLng },
-      points: clusterPoints,
-    };
-  });
-
-  // ✅ 클러스터에 포함되지 않은 (노이즈) 단일 제보도 추가
-  filtered.forEach((point, idx) => {
-    if (!clusteredIndexes.has(idx)) {
-      result.push({
-        cluster_id: result.length,
-        count: 1,
-        center: { lat: point.lat, lng: point.lng },
-        points: [point],
-      });
-    }
-  });
-
-  console.log('🧠 최종 클러스터 개수 (군집 + 단일 포함):', result.length);
-  result.forEach((c: { cluster_id: any; count: any; center: any; }) =>
-    console.log(`🧩 cluster_id: ${c.cluster_id}, count: ${c.count}, center:`, c.center)
-  );
-
-  return NextResponse.json(result);
-}
-
-// ✅ 거리 계산 (Haversine)
 function haversineDistance(a: number[], b: number[]) {
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const R = 6371;
@@ -102,4 +25,88 @@ function haversineDistance(a: number[], b: number[]) {
     Math.sin(dLat / 2) ** 2 +
     Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
   return 2 * R * Math.asin(Math.sqrt(aVal));
+}
+
+export async function GET(req: Request) {
+  const supabase = await createClient();
+  const { searchParams } = new URL(req.url);
+
+  const lat = parseFloat(searchParams.get('lat') || '0');
+  const lng = parseFloat(searchParams.get('lng') || '0');
+  const zoom = parseInt(searchParams.get('zoom') || '15', 10);
+
+  const { data, error } = await supabase
+    .from('reports')
+    .select('id, type, report_lat, report_lng, missing_lat, missing_lng, distance_m, media_urls, content, user_id, created_at');
+
+  if (error) {
+    console.error('❌ Supabase fetch error:', error);
+    return NextResponse.json({ error }, { status: 500 });
+  }
+
+  const filtered = data
+    .filter((item) => {
+      if (item.type === 'missing') return item.missing_lat && item.missing_lng;
+      if (['incident', 'damage'].includes(item.type)) return item.distance_m && item.distance_m <= 100;
+      return false;
+    })
+    .map((item) => ({
+      id: item.id,
+      lat: item.type === 'missing' ? item.missing_lat : item.report_lat,
+      lng: item.type === 'missing' ? item.missing_lng : item.report_lng,
+      media_url: item.media_urls?.[0] ?? "/placeholder.png",
+      user_id: item.user_id ?? "익명",
+      content: item.content ?? "설명 없음",
+      created_at: item.created_at ?? "날짜 없음",
+    }));
+
+  const eps = getEpsByZoom(zoom);
+  const coords = filtered.map((p) => [p.lat, p.lng]);
+
+  const dbscan = require('density-clustering').DBSCAN;
+  const clustering = new dbscan();
+  const clustersRaw = clustering.run(coords, eps, 2, haversineDistance);
+  const clusteredIndexes = new Set(clustersRaw.flat());
+
+  const result = clustersRaw.map((cluster: number[], i: any) => {
+    const clusterPoints = cluster.map((idx: number) => filtered[idx]);
+
+    const centerLat = clusterPoints.reduce((sum: any, p: { lat: any; }) => sum + p.lat, 0) / clusterPoints.length;
+    const centerLng = clusterPoints.reduce((sum: any, p: { lng: any; }) => sum + p.lng, 0) / clusterPoints.length;
+
+    const representative = clusterPoints[0];
+
+    return {
+      cluster_id: i,
+      count: clusterPoints.length,
+      center: { lat: centerLat, lng: centerLng },
+      thumbnail: representative.media_url,
+      report: {
+        id: representative.id,
+        user_id: representative.user_id,
+        content: representative.content,
+        created_at: representative.created_at
+      }
+    };
+  });
+
+  // 단일 포인트(노이즈)도 클러스터처럼 추가
+  filtered.forEach((point, idx) => {
+    if (!clusteredIndexes.has(idx)) {
+      result.push({
+        cluster_id: result.length,
+        count: 1,
+        center: { lat: point.lat, lng: point.lng },
+        thumbnail: point.media_url,
+        report: {
+          id: point.id,
+          user_id: point.user_id,
+          content: point.content,
+          created_at: point.created_at
+        }
+      });
+    }
+  });
+
+  return NextResponse.json(result);
 }
