@@ -22,7 +22,7 @@ export default function Preview({ report, handleClose }: { report: Report, handl
         <div className="bg-white max-h-[228px] overflow-hidden rounded-2xl shadow-lg pointer-events-auto max-w-md mx-auto drop-shadow-[0_0px_6px_rgba(0,0,0,0.15)]">
             <div className="flex">
                 <Link
-                    href={`/home/${report.id}`}
+                    href={`/home/reportList/?id=${report.id}`}
                     className="w-[50vh] aspect-[3/4] h-full overflow-hidden rounded-l-xl cursor-pointer"
                 >
                     <img

@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   const supabase = await createClient();
-  const reportId = params.id;
+  const reportId = await params.id;
 
   console.log("📥 요청받은 report ID:", reportId);
 

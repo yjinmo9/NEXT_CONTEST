@@ -130,10 +130,6 @@ useEffect(() => {
     
           setSelectedReport(report);
 
-          const nearbyRes = await fetch(`/api/report/nearby-reports?lat=${cluster.center.lat}&lng=${cluster.center.lng}`);
-          const reports = await nearbyRes.json();
-          console.log("📍 거리순 제보 리스트:", reports);
-
         } catch (err) {
           console.error("❌ 클러스터 대표 제보 불러오기 실패", err);
         }

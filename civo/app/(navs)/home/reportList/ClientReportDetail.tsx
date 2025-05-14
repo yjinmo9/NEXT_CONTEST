@@ -13,6 +13,10 @@ export type Report = {
   media_urls?: string[];
   type: string;
   distance_m?: number;
+  report_lat: number;
+  report_lng: number;
+  missing_lat?: number;
+  missing_lng?: number;
 };
 
 export default function ClientReportDetail({ id }: { id: string }) {
@@ -43,7 +47,7 @@ export default function ClientReportDetail({ id }: { id: string }) {
   }, [id]);
 
   if (loading) return <p className="p-4">로딩 중...</p>;
-  if (error) return <p className="p-4 text-red-500">❌ {error}</p>;
+  if (error) return <p className="p-4 text-red-500"></p>;
   if (!report) return <p className="p-4">데이터가 없습니다.</p>;
 
   return (
