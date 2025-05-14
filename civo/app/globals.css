@@ -67,3 +67,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+.custom-cluster-icon {
+  background-color: #dc2626;
+  color: white;
+  font-size: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
