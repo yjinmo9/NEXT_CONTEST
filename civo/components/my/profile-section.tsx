@@ -11,7 +11,7 @@ export function ProfileSection({name}: {name?: string}) {
       <div className="flex items-center gap-[10px]">
         <div className="relative w-[50px] h-[50px]">
           <Image 
-            src="/img/help.png"  
+            src="/img/mypage.png"
             alt="프로필" 
             width={50}
             height={50}

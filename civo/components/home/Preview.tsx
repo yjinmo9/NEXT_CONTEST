@@ -28,7 +28,7 @@ export default function Preview({ report }: { report: Report }) {
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                         <img
-                            src={report.user_id ? `/profile/${report.user_id}` : "/img/mypage.png"}
+                            src={"/img/mypage.png"}
                             alt="프로필"
                             className="w-[30px] h-[30px] rounded-full object-cover"
                         />
