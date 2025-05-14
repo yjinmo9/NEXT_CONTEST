@@ -39,7 +39,7 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-up", "이메일과 비밀번호를 입력해주세요.");
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -47,8 +47,21 @@ export const signUpAction = async (formData: FormData) => {
     },
   });
 
-  if (error) {
-    return encodedRedirect("error", "/sign-up", error.message);
+  if (error || !data.user) {
+    return encodedRedirect("error", "/sign-up", error?.message || "회원가입 실패");
+  }
+
+  // ⭐ users 테이블에 insert
+  const { error: insertError } = await supabase.from("users").insert([
+    {
+      uid: data.user.id, // auth.users 테이블의 id
+      email: email,
+      // 필요 시 display_name 등 추가 가능
+    },
+  ]);
+
+  if (insertError) {
+    return encodedRedirect("error", "/sign-up", `회원가입은 되었지만 사용자 정보 저장 실패: ${insertError.message}`);
   }
 
   return encodedRedirect(
