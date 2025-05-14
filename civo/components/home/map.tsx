@@ -29,6 +29,8 @@ type Report = {
   media_urls?: string[];
   created_at?: string;
   content?: string;
+  missing_lat?: number;
+  missing_lng?: number;
 };
 
 
@@ -89,43 +91,51 @@ export default function Map({
     markersRef.current = [];
 
     reports.forEach((report) => {
-  const show =
-    report.type === "missing" ||
-    (typeof report.distance_m === "number" && report.distance_m <= 100);
+      const show =
+        report.type === "missing" ||
+        (typeof report.distance_m === "number" && report.distance_m <= 100);
 
-  const validCoords =
-    report.report_lat != null &&
-    report.report_lng != null &&
-    !isNaN(report.report_lat) &&
-    !isNaN(report.report_lng);
+      const lat = report.type==="missing"? report.missing_lat:report.report_lat;
+      const lng = report.type==="missing"? report.missing_lng:report.report_lng;
 
-  if (show && validCoords) {
-    const latlng = new naver.maps.LatLng(report.report_lat, report.report_lng);
-    const imageUrl = report.media_urls?.[0];
-    const fallbackIcon = getIconUrl(report.category || "기타");
+      const validCoords =
+        lat != null &&
+        lng != null &&
+        !isNaN(lat) &&
+        !isNaN(lng);
+      
+      console.log(report.type)
+      console.log(show)
+      console.log(validCoords)
+      console.log(report.media_urls)
 
-    const marker = new naver.maps.Marker({
-      position: latlng,
-      map,
-      title: report.title || "제보",
-      icon: {
-        url: imageUrl || fallbackIcon, // media_urls[0] 사용
-        size: new naver.maps.Size(40, 40),
-        scaledSize: new naver.maps.Size(40, 40),
-        anchor: new naver.maps.Point(20, 20),
-        origin: new naver.maps.Point(0, 0),
+      if (show && validCoords) {
+        const latlng = new naver.maps.LatLng(lat, lng);
+        const imageUrl = report.media_urls?.[0];
+        const fallbackIcon = getIconUrl(report.category|| "기타");
+
+        const marker = new naver.maps.Marker({
+          position: latlng,
+          map,
+          title: report.title || "제보",
+          icon: {
+            url: imageUrl || fallbackIcon, // media_urls[0] 사용
+            size: new naver.maps.Size(40, 40),
+            scaledSize: new naver.maps.Size(40, 40),
+            anchor: new naver.maps.Point(20, 20),
+            origin: new naver.maps.Point(0, 0),
+          }
+        });
+
+        naver.maps.Event.addListener(marker, "click", () => {
+          map.setZoom(17);
+          map.panTo(latlng);
+          setSelectedReport(report);
+        });
+
+        markersRef.current.push(marker);
       }
     });
-
-    naver.maps.Event.addListener(marker, "click", () => {
-      map.setZoom(17);
-      map.panTo(latlng);
-      setSelectedReport(report);
-    });
-
-    markersRef.current.push(marker);
-  }
-});
   }, [reports]);
 
   // ✅ 현위치로 지도 이동
@@ -158,9 +168,9 @@ export default function Map({
         </button>
       )}
       {selectedReport && (
-      <div className="fixed bottom-[10vh] w-full mb-100 z-50 px-4 pb-4 pointer-events-none">
-      <Preview report={selectedReport} />
-      </div>
+        <div className="fixed bottom-[10vh] w-full mb-100 z-50 px-4 pb-4 pointer-events-none">
+          <Preview report={selectedReport} />
+        </div>
       )}
     </>
   );
