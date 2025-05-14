@@ -104,15 +104,17 @@ export async function fetchAndStoreNews(): Promise<void> {
 
     console.log("📦 삽입 직전 뉴스 샘플:", JSON.stringify(uniqueNewsItems[0], null, 2));
 
-    const { error } = await supabase
-      .from('news')
-      .upsert(uniqueNewsItems, { onConflict: 'url' });
+    const { data, error } = await supabase
+  .from("news")
+  .insert([{ title: "테스트 뉴스", url: "https://..." }])
 
-    if (error) {
-      console.error('🚨 Supabase 뉴스 저장 에러:', error);
-    } else {
-      console.log('✅ 뉴스가 성공적으로 저장되었습니다!');
-    }
+  
+
+if (error) {
+  console.error("🚨 Supabase 뉴스 저장 에러:", error);
+} else {
+  console.log("✅ 뉴스 저장 완료:", data);
+}
 
   } catch (error) {
     console.error('❌ RSS 피드 파싱 에러:', error);
