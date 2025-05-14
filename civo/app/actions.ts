@@ -7,7 +7,6 @@ import { fetchAndStoreNews, formatRelativeTimeKST } from "@/lib/newsCrawler";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
-
 export const createClient = async () => {
   const cookieStore = await cookies(); // ✅ 동기 함수
   return createServerClient(
@@ -32,6 +31,8 @@ export const createClient = async () => {
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const phone = formData.get("phone")?.toString();
+  const name = formData.get("name")?.toString();
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
@@ -51,12 +52,13 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-up", error?.message || "회원가입 실패");
   }
 
-  // ⭐ users 테이블에 insert
-  const { error: insertError } = await supabase.from("users").insert([
+  // ⭐ pending_users 테이블에 insert
+  const { error: insertError } = await supabase.from("pending_users").insert([
     {
-      uid: data.user.id, // auth.users 테이블의 id
+      id: data.user.id, // auth.users 테이블의 id
+      name: name,
       email: email,
-      // 필요 시 display_name 등 추가 가능
+      phone: phone,
     },
   ]);
 
