@@ -128,11 +128,8 @@ useEffect(() => {
              // 📌 클러스터 정보 로그
           console.log("📦 report 데이터:", report);
     
-          setSelectedReport({
-            ...report,
-            title: `${cluster.count}건 중 하나`,
-            category: "군집",
-          });
+          setSelectedReport(report);
+          
         } catch (err) {
           console.error("❌ 클러스터 대표 제보 불러오기 실패", err);
         }

@@ -47,7 +47,7 @@ export async function GET(req: Request) {
   const filtered = data
     .filter((item) => {
       if (item.type === 'missing') return item.missing_lat && item.missing_lng;
-      if (['incident', 'damage'].includes(item.type)) return item.distance_m && item.distance_m <= 100;
+      if (['incident', 'damage'].includes(item.type) && item.distance_m <= 100) return item.report_lat && item.report_lng;
       return false;
     })
     .map((item) => ({

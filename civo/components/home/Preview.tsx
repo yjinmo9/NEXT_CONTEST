@@ -10,7 +10,7 @@ type Report = {
     distance_m?: number | null;
     title?: string;
     category?: string;
-    media_urls?: string[];
+    media_url: string;
     created_at?: string;
     content?: string;
     user_id?: string;
@@ -26,7 +26,7 @@ export default function Preview({ report }: { report: Report }) {
                     className="w-[50vh] aspect-[3/4] h-full overflow-hidden rounded-l-xl cursor-pointer"
                 >
                     <img
-                        src={report.media_urls?.[0] || "/placeholder.png"}
+                        src={report.media_url || "/placeholder.png"}
                         alt="썸네일"
                         className="w-full h-full object-cover object-center"
                     />
