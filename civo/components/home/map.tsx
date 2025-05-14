@@ -19,6 +19,7 @@ type Cluster = {
   count: number;
   center: { lat: number; lng: number };
   points: { lat: number; lng: number }[];
+}
 
 type Report = {
   id?: string;
