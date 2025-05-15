@@ -6,8 +6,9 @@ import { redirect } from "next/navigation";
 import { fetchAndStoreNews, formatRelativeTimeKST } from "@/lib/newsCrawler";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@/utils/supabase/server";
 
-export const createClient = async () => {
+/*export const createClient = async () => {
   const cookieStore = await cookies(); // ✅ 동기 함수
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,7 +27,7 @@ export const createClient = async () => {
       },
     }
   );
-};
+}; */
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -312,12 +313,8 @@ export const getReportsForMap = async () => {
 };
 
 export const getUserIdAction = async () => {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("x-user-id");
-  if (!userId) {  
-    console.error("❌ 사용자 ID가 없습니다.");
-    return null;
-  } 
-  console.log("✅ 사용자 ID:", userId);
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
   return userId;
 };
