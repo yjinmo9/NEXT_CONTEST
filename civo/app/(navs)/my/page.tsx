@@ -12,6 +12,8 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true);
   const supabase = createClientComponentClient();
   const [user_id, setUserId] = useState<string | null>(null);
+  const [username, setUserName] = useState<string>("익명");
+  const [profileImage, setProfileImage] = useState<string>();
 
   useEffect(() => {
     async function fetchReports() {
@@ -19,7 +21,7 @@ export default function MyPage() {
         setLoading(true);
 
         const user_id = await getUserIdAction();
-        setUserId(user_id);
+        setUserId(user_id || null);
         console.log("🔥 현재 사용자 ID:", user_id);
 
         const { data, error } = await supabase
@@ -48,14 +50,31 @@ export default function MyPage() {
       } finally {
         setLoading(false);
       }
+    } 
+    async function fetchUserInfo() {
+      const userId = await getUserIdAction();
+
+      setUserId(userId || "익명"); // ✅ 여기서 바로 user.id 사용
+
+      const res = await fetch(`/api/user/${userId}`)
+      const data = await res.json();
+      console.log("🔥 사용자 정보:", data);
+
+      if (data) {
+        setUserName(data.name);
+        setProfileImage(data.profile_image);
+      } else {
+        console.warn("⚠️ 사용자 정보가 비어 있음");
+      }
     }
 
     fetchReports();
+    fetchUserInfo();
   }, [supabase]);
 
   return (
     <div className="w-full z-30 bg-white min-h-screen">
-      <ProfileSection name={user_id || "이름이 없습니다."}/>
+      <ProfileSection name={username || "이름이 없습니다."} profile={profileImage} />
       <ReputationSection />
       <ReportSection reports={reports} isLoading={loading} />
     </div>
