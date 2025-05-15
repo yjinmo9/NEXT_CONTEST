@@ -16,7 +16,7 @@ export default function Footer() {
     const pathname = usePathname();
 
     return (
-      <footer className={`fixed bottom-0 h-[89px] w-full pb-[15px] pt-[9px] bg-white flex rounded-t-2xl items-center justify-around drop-shadow-[0_0px_6px_rgba(0,0,0,0.15)] z-10 ${pathname==='/splash1'||pathname==='/splash2'?'hidden':''}`}>
+      <footer className={`fixed bottom-0 h-[89px] w-screen mx-auto pb-[15px] pt-[9px] bg-white flex rounded-t-2xl items-center justify-around drop-shadow-[0_0px_6px_rgba(0,0,0,0.15)] z-10 ${pathname==='/splash1'||pathname==='/splash2'?'hidden':''}`}>
         <Link className={`flex flex-1 flex-col items-center justify-center gap-[3px] ${pathname.startsWith('/home') ? 'text-black' : 'text-gray-400'}`} href={'/home'}>
           <Image src={pathname.startsWith('/home')?HomeSelected:Home} alt="메인" width={21} height={19} />
           <span className="text-[10px]">Home</span>
