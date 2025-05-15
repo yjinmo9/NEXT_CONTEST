@@ -1,20 +1,20 @@
 import { createClient } from "@/utils/supabase/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // GET /api/home/[id]
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: { id: string } }
 ) {
   const supabase = await createClient();
-  const reportId = await params.id;
+  const {id} = context.params;
 
-  console.log("📥 요청받은 report ID:", reportId);
+  console.log("📥 요청받은 report ID:", id);
 
   const { data, error } = await supabase
     .from("reports")
     .select("*")
-    .eq("id", reportId)
+    .eq("id", id)
     .single();
 
   if (error) {
