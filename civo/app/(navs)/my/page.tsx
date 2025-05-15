@@ -56,7 +56,7 @@ export default function MyPage() {
 
       setUserId(userId || "익명"); // ✅ 여기서 바로 user.id 사용
 
-      const res = await fetch(`/api/user/${userId}`)
+      const res = await fetch(`/api/user?uid=${userId}`)
       const data = await res.json();
       console.log("🔥 사용자 정보:", data);
 

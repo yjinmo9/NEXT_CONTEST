@@ -65,7 +65,7 @@ export default function ProfileEditPage() {
 
         const url = result.url
 
-        await fetch(`/api/user/${userId}`, {
+        await fetch(`/api/user?uid=${userId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

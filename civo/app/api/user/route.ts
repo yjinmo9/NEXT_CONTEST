@@ -1,9 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, { params }: { params: { uid: string } }) {
+export async function GET(req: Request) {
   const supabase = await createClient();
-  const uid = (await params).uid;
+  const { searchParams } = new URL(req.url);
+  const uid = searchParams.get("uid");
 
   const { data, error } = await supabase
     .from("users")
@@ -21,9 +22,10 @@ export async function GET(req: Request, { params }: { params: { uid: string } })
   return NextResponse.json(data);
 }
 
-export async function POST(req: Request, { params }: { params: { uid: string } }) {
+export async function POST(req: Request) {
   const supabase = await createClient();
-  const uid = (await params).uid;
+  const { searchParams } = new URL(req.url);
+  const uid = searchParams.get("uid");
 
   const body = await req.json(); // 🔹 요청 바디에서 name 등 추출
   const { name, email, phone, profile_image} = body;
