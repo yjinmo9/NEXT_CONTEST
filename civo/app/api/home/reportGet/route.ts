@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 // GET /api/home/[id]
 export async function GET(
-  req: NextRequest,
-  context: { params: { id: string } }
+  req: NextRequest
 ) {
   const supabase = await createClient();
-  const {id} = context.params;
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
 
   console.log("📥 요청받은 report ID:", id);
 

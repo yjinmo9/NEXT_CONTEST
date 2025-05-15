@@ -18,7 +18,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
   async function fetchReport() {
-    const res = await fetch(`/api/home/${id}`);
+    const res = await fetch(`/api/home/reportGet?id=${activeId}`);
     const data = await res.json();
 
     if (!res.ok) {
