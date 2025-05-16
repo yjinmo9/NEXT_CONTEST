@@ -1,6 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-import { data as autoprefixerData } from "autoprefixer";
-import { error } from "console";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -11,29 +9,28 @@ export async function GET(req: Request) {
   const supabase = await createClient();
   const delta = 0.0015;
 
-// 1️⃣ incident / damage → report_lat/lng 기준
-const { data: reportData, error: reportError } = await supabase
-  .from("reports")
-  .select("id, report_lat, report_lng, content, created_at, user_id, media_urls, type")
-  .in("type", ["incident", "damage"])
-  .filter("report_lat", "gte", lat - delta)
-  .filter("report_lat", "lte", lat + delta)
-  .filter("report_lng", "gte", lng - delta)
-  .filter("report_lng", "lte", lng + delta);
+  // 1️⃣ incident / damage → report_lat/lng 기준
+  const { data: reportData, error: reportError } = await supabase
+    .from("reports")
+    .select("id, report_lat, report_lng, content, created_at, user_id, type")
+    .in("type", ["incident", "damage"])
+    .filter("report_lat", "gte", lat - delta)
+    .filter("report_lat", "lte", lat + delta)
+    .filter("report_lng", "gte", lng - delta)
+    .filter("report_lng", "lte", lng + delta);
 
-// 2️⃣ missing → missing_lat/lng 기준
-const { data: missingData, error: missingError } = await supabase
-  .from("reports")
-  .select("id, missing_lat, missing_lng, content, created_at, user_id, media_urls, type")
-  .eq("type", "missing")
-  .filter("missing_lat", "gte", lat - delta)
-  .filter("missing_lat", "lte", lat + delta)
-  .filter("missing_lng", "gte", lng - delta)
-  .filter("missing_lng", "lte", lng + delta);
+  // 2️⃣ missing → missing_lat/lng 기준
+  const { data: missingData, error: missingError } = await supabase
+    .from("reports")
+    .select("id, missing_lat, missing_lng, content, created_at, user_id, type")
+    .eq("type", "missing")
+    .filter("missing_lat", "gte", lat - delta)
+    .filter("missing_lat", "lte", lat + delta)
+    .filter("missing_lng", "gte", lng - delta)
+    .filter("missing_lng", "lte", lng + delta);
 
-// 3️⃣ 두 결과 합치기
-const allData = [...(reportData ?? []), ...(missingData ?? [])];
-
+  // 3️⃣ 두 결과 합치기
+  const allData = [...(reportData ?? []), ...(missingData ?? [])];
 
   if (reportError || missingError) {
     const supabaseError = reportError || missingError;
@@ -48,17 +45,19 @@ const allData = [...(reportData ?? []), ...(missingData ?? [])];
 
   const r = allData[0];
 
-  const isReportType = (data: typeof r): data is { id: any; report_lat: any; report_lng: any; content: any; created_at: any; user_id: any; media_urls: any; type: any } =>
+  const isReportType = (data: typeof r): data is { report_lat: number; report_lng: number; id: any; content: any; created_at: any; user_id: any; type: any } =>
     "report_lat" in data && "report_lng" in data;
 
   return NextResponse.json({
     id: r.id,
-    report_lat: isReportType(r) ? r.report_lat : r.missing_lat,
-    report_lng: isReportType(r) ? r.report_lng : r.missing_lng,
+    report_lat: "missing_lat" in r ? r.missing_lat : r.report_lat,
+    report_lng: "missing_lng" in r ? r.missing_lng : r.report_lng,
     content: r.content,
     created_at: r.created_at,
     user_id: r.user_id ?? "익명",
-    media_url: r.media_urls?.[0] ?? "/placeholder.png",
+    type: r.type,
+    // ❌ media_url 필드 완전 제거
   });
 }
+
 

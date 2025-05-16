@@ -83,32 +83,102 @@ export default function Map({
         ? new naver.maps.LatLng(cluster.points[0].lat, cluster.points[0].lng)
         : new naver.maps.LatLng(cluster.center.lat, cluster.center.lng);
 
-      const marker = new naver.maps.Marker({
-        map,
-        position: latlng,
-        icon: isSingle
-          ? undefined
-          : {
-            content: `
-              <div style="
-                background-color: #dc2626;
-                color: white;
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 12px;
-                font-weight: bold;
-                box-shadow: 0 0 6px rgba(0,0,0,0.3);
-              ">
-                ${cluster.count}
-              </div>
-            `,
-            anchor: new naver.maps.Point(16, 16),
-          },
-      });
+        const getClusterColor = (count: number) => {
+          if (count >= 100) return "#fde047";
+          if (count >= 50) return "#f87171";
+          if (count >= 20) return "#fb923c";
+          if (count >= 10) return "#60a5fa";
+          return "#a78bfa";
+        };
+      
+        const color = getClusterColor(cluster.count);
+
+        // 예시: cluster.count가 클수록 마커 크기도 커지게
+        const count = Number(cluster.count);
+
+
+        // ✅ 현재 지도 줌 레벨 가져오기
+        const zoom = map.getZoom();
+
+        // ✅ 줌 레벨 보정 팩터: 줌 15을 기준 (1.1의 거듭제곱)
+        const zoomFactor = Math.pow(1.1, zoom - 15);
+
+        // ✅ 클러스터 개수 기반 + 줌 비례한 마커 크기
+        const baseSize = 32;
+        const rawSize = Math.sqrt(count) * 10 + baseSize;
+        const finalSize = isSingle ? baseSize : Math.min(rawSize * zoomFactor * 3, 12000);
+        const innerSize = isSingle ? baseSize : finalSize * 0.5;
+
+        // ✅ 디버깅 로그
+        console.log(
+          `🧠 count: ${count}, zoom: ${zoom}, zoomFactor: ${zoomFactor.toFixed(2)}, finalSize: ${finalSize.toFixed(1)}`
+        );
+
+        if (isSingle && zoom <= 11) return; // 이 마커 안 그리기
+       
+      
+        const marker = new naver.maps.Marker({
+          map,
+          position: latlng,
+          icon: isSingle
+            ? {
+                content: `
+                  <div style="
+                    width: ${finalSize}px;
+                    height: ${finalSize}px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+                  "></div>
+                `,
+                size: new naver.maps.Size(finalSize, finalSize),
+                anchor: new naver.maps.Point(finalSize / 2, finalSize / 2),
+              }
+            : {
+                content: `
+                  <div style="position: relative; width: ${finalSize}px; height: ${finalSize}px;">
+                    <!-- 연한 외곽 큰 원 -->
+                    <div style="
+                      position: absolute;
+                      top: 0;
+                      left: 0;
+                      width: ${finalSize}px;
+                      height: ${finalSize}px;
+                      border-radius: 50%;
+                      background-color: ${color}33;
+                    "></div>
+        
+                    <!-- 중심 진한 작은 원 -->
+                    <div style="
+                      position: absolute;
+                      top: 50%;
+                      left: 50%;
+                      transform: translate(-50%, -50%);
+                      width: ${innerSize}px;
+                      height: ${innerSize}px;
+                      border-radius: 50%;
+                      background-color: ${color};
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      font-size: 14px;
+                      font-weight: bold;
+                      color: white;
+                      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+                    ">
+                      ${cluster.count >= 100 ? '100+' : cluster.count}
+                    </div>
+                  </div>
+                `,
+                size: new naver.maps.Size(finalSize, finalSize),
+                anchor: new naver.maps.Point(finalSize / 2, finalSize / 2),
+              }
+        });
+        
+      
 
       naver.maps.Event.addListener(marker, "click", async () => {
         map.setZoom(isSingle ? 17 : map.getZoom());
