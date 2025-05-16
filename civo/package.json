@@ -1,10 +1,10 @@
 {
   "private": true,
-"scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start"
-},
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.1",
     "@radix-ui/react-dropdown-menu": "^2.1.1",
@@ -25,6 +25,7 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^0.468.0",
     "next": "latest",
+    "next-pwa": "^5.6.0",
     "next-themes": "^0.4.3",
     "playwright": "^1.52.0",
     "prettier": "^3.3.3",

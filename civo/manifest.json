@@ -1,0 +1,9 @@
+{
+  "name": "CIVO - 시민들의 소식보고앱",
+  "short_name": "CIVO",
+  "theme_color": "#ffffff",
+  "background_color": "#2196f3",
+  "display": "fullscreen",
+  "scope": "/",
+  "start_url": "/civo.live"
+}

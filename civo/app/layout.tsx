@@ -20,8 +20,17 @@ export const metadata = {
   metadataBase: new URL(defaultUrl),
   title: "CIVO",
   description: "우리 주변의 소식을 가장 빠르게 보는 방법",
+  manifest: "/manifest.json",
   icon: '/favicon.png',
+  viewport:
+    "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover",
 };
+
+
+export const viewport = {
+  themeColor: "#ffffff",
+};
+
 
 const geistSans = Geist({
   display: "swap",
@@ -38,7 +47,7 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body className="max-w-[420px] max-w-screen h-screen mx-auto flex flex-col">
+      <body className="max-w-screen h-screen mx-auto flex flex-col">
       <main className="relative z-10 mt-[92.65px] flex-grow min-h-0">{children}</main>
       <Header />
       <Footer/>
