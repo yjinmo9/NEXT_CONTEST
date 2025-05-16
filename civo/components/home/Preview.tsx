@@ -1,6 +1,7 @@
 import Link from "next/link";
 import reportImg from '@/src/img/reporter.png';
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 type Report = {
     id?: string;
@@ -16,40 +17,72 @@ type Report = {
     user_id?: string;
 };
 
-export default function Preview({ report, handleClose }: { report: Report, handleClose: (report:null) => void }) {
-    const userName = report.user_id || "익명";
+type userData = {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    profile_image: string;
+}
+
+export default function Preview({ report, handleClose }: { report: Report, handleClose: (report: null) => void }) {
+    const [userName, setUserName] = useState<string>("익명");
+    const [profileImage, setProfileImage] = useState<string>();
+
+    useEffect(() => {
+
+        const fetchUserData = async (userId: string) => {
+            const userRes = await fetch(`/api/user?uid=${userId}`);
+            if (!userRes.ok) {
+                throw new Error("Failed to fetch user data");
+            }
+            const userData: userData = await userRes.json();
+            console.log("🔥 userData:", userData);
+            if (!userData) {
+                throw new Error("User data not found");
+            }
+            setProfileImage(userData.profile_image ?? null);
+            setUserName(userData.name ?? '익명');
+        }
+        console.log("🔥 Preview 컴포넌트에서 받은 user_id:", report.user_id);
+        fetchUserData(report.user_id || "")
+    }, [report.user_id])
     return (
         <div className="bg-white max-h-[228px] overflow-hidden rounded-2xl shadow-lg pointer-events-auto max-w-md mx-auto drop-shadow-[0_0px_6px_rgba(0,0,0,0.15)]">
             <div className="flex">
                 <Link
                     href={`/home/reportList/?id=${report.id}`}
-                    className="w-[50vh] aspect-[3/4] h-full overflow-hidden rounded-l-xl cursor-pointer"
+                    className="overflow-hidden rounded-l-xl cursor-pointer"
                 >
-                    <img
+                    <Image
+                        width={100}
+                        height={100}
                         src={report.media_url || "/placeholder.png"}
                         alt="썸네일"
-                        className="w-full h-full object-cover object-center"
+                        className="w-[30vh] aspect-[3/4] object-cover object-center"
                     />
                     <div className="flex gap-[4px] absolute bottom-[10px] left-[80px] justify-center items-center">
-                    <Image
-                        src={reportImg}
-                        alt="신고 아이콘"
-                        width={10}
-                        height={10}
-                        className="h-[10px] opacity-100"/>
-                    <div className="text-white text-[11px] font-semibold">{userName}</div>
-                    {/*여기 조회수*/}
+                        <Image
+                            src={reportImg}
+                            alt="신고 아이콘"
+                            width={10}
+                            height={10}
+                            className="h-[10px] opacity-100" />
+                        <div className="text-white text-[11px] font-semibold">{userName}</div>
+                        {/*여기 조회수*/}
                     </div>
 
                 </Link>
                 <div className="flex flex-col gap-2 p-4">
                     <div className="flex items-center gap-2">
-                        <img
-                            src={"/img/mypage.png"}
+                        <Image
+                            width={30}
+                            height={30}
+                            src={profileImage ?? "/img/mypage.png"}
                             alt="프로필"
-                            className="w-[30px] h-[30px] rounded-full object-cover"
+                            className="aspect-square rounded-full object-cover"
                         />
-                        <p className="text-sm font-semibold">{report.user_id || "익명"}</p>
+                        <p className="text-sm font-semibold">{userName || "익명"}</p>
                     </div>
                     <div>
                         <p className="text-[11px] font-semibold">{report.title}</p>

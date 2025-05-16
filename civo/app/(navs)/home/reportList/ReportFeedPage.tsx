@@ -13,9 +13,13 @@ export default function ReportFeedPage() {
     const reportRefs = useRef<Record<string, HTMLDivElement | null>>({});
     const loaderRef = useRef<HTMLDivElement | null>(null);
 
+    const [noNewReports, setNoNewReports] = useState(false);
+
+    const [radius, setRadius] = useState<number>(100);
+    const [length, setLength] = useState<number>(6);
 
     async function fetchReport() {
-        const res = await fetch(`/api/home/${targetIdFromUrl}`);
+        const res = await fetch(`/api/home/reportGet?id=${targetIdFromUrl}`);
         const data = await res.json();
 
         if (!res.ok) {
@@ -31,25 +35,37 @@ export default function ReportFeedPage() {
         const report = await fetchReport();
 
         const lat = report?.report_lat || report?.missing_lat;
-        const lng = report?.report_lng || report?.missing_lng;  
-
+        const lng = report?.report_lng || report?.missing_lng;
         console.log('📦 로드된 신고글:', report);
 
-        const res = await fetch(`/api/report/nearby-reports?lat=${lat}&lng=${lng}`);
-        const ids: string[] = await res.json();
+        const res = await fetch(`/api/report/nearby-reports?lat=${lat}&lng=${lng}&radius=${radius}&length=${length}`);
+        const response = await res.json();
+        const ids = response.data.result;
+        const resultRadius = response.data.radius;
+        const resultLength = response.data.result.length;
 
+        console.log('📦 로드된 반경:', resultRadius);
+        console.log('📦 로드된 길이:', resultLength);
+
+        setRadius(resultRadius);
+        setLength(resultLength+3);
         console.log('📦 로드된 ID들:', ids);
 
-        setReports((prev) => Array.from(new Set([...prev, ...ids])));
-    }, []);
+        // ✅ 중복 확인
+        setReports((prev) => {
+            const uniqueNewIds = ids.filter((id:string) => !prev.includes(id));
+            const newState = Array.from(new Set([...prev, ...uniqueNewIds]));
 
-    // ✅ 자동 스크롤 (렌더 후)
-    useEffect(() => {
-        if (targetIdFromUrl && reportRefs.current[targetIdFromUrl]) {
-            const targetEl = reportRefs.current[targetIdFromUrl];
-            targetEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }, [reports, targetIdFromUrl]);
+            // ✅ 모든 아이디가 중복일 경우
+            if (uniqueNewIds.length === 0) {
+                setNoNewReports(true);
+            } else {
+                setNoNewReports(false);
+            }
+
+            return newState;
+        });
+    }, [radius, length]);
 
     // ✅ IntersectionObserver로 자동 로딩
     useEffect(() => {
@@ -60,7 +76,10 @@ export default function ReportFeedPage() {
                     loadMoreReports();
                 }
             },
-            { threshold: 1 }
+            { 
+                threshold: 1,
+                rootMargin: '400% 0px'
+             }
         );
         observer.observe(loaderRef.current);
         return () => observer.disconnect();
@@ -82,6 +101,11 @@ export default function ReportFeedPage() {
             <div ref={loaderRef} className="py-8 text-center text-gray-400">
                 불러오는 중...
             </div>
+            {noNewReports && (
+                <div className="py-4 text-center text-gray-400">
+                    더 이상 게시물이 없습니다.
+                </div>
+            )}
         </div>
     );
 }

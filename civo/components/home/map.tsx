@@ -20,7 +20,7 @@ type Cluster = {
   center: { lat: number; lng: number };
   points: {
     lat: number; lng: number;
-}[];
+  }[];
 };
 
 export default function Map({
@@ -51,7 +51,8 @@ export default function Map({
       logoControlOptions: {
         position: naver.maps.Position.BOTTOM_LEFT,
       },
-      customStyleId:"3e4f5b9e-1671-4b58-a2bc-fe641fddae0a"
+      gl: true,
+      customStyleId: "3e4f5b9e-1671-4b58-a2bc-fe641fddae0a"
     };
 
     const map = new window.naver.maps.Map(mapId, mapOptions);
@@ -62,32 +63,32 @@ export default function Map({
     }
   }, [loc, onReady]);
 
-// ✅ 마커 렌더링
-useEffect(() => {
-  if (!Array.isArray(reports)) return;
+  // ✅ 마커 렌더링
+  useEffect(() => {
+    if (!Array.isArray(reports)) return;
 
-  const map = mapRef.current;
-  if (!map) return;
+    const map = mapRef.current;
+    if (!map) return;
 
-  // 기존 마커 제거
-  markersRef.current.forEach((marker) => marker.setMap(null));
-  markersRef.current = [];
+    // 기존 마커 제거
+    markersRef.current.forEach((marker) => marker.setMap(null));
+    markersRef.current = [];
 
-  reports.forEach((cluster) => {
-    const isSingle = cluster.count === 1;
-    const hasPoint = Array.isArray(cluster.points) && cluster.points.length > 0;
+    reports.forEach((cluster) => {
+      const isSingle = cluster.count === 1;
+      const hasPoint = Array.isArray(cluster.points) && cluster.points.length > 0;
 
 
-    const latlng = isSingle && hasPoint
-      ? new naver.maps.LatLng(cluster.points[0].lat, cluster.points[0].lng)
-      : new naver.maps.LatLng(cluster.center.lat, cluster.center.lng);
+      const latlng = isSingle && hasPoint
+        ? new naver.maps.LatLng(cluster.points[0].lat, cluster.points[0].lng)
+        : new naver.maps.LatLng(cluster.center.lat, cluster.center.lng);
 
-    const marker = new naver.maps.Marker({
-      map,
-      position: latlng,
-      icon: isSingle
-        ? undefined
-        : {
+      const marker = new naver.maps.Marker({
+        map,
+        position: latlng,
+        icon: isSingle
+          ? undefined
+          : {
             content: `
               <div style="
                 background-color: #dc2626;
@@ -107,77 +108,77 @@ useEffect(() => {
             `,
             anchor: new naver.maps.Point(16, 16),
           },
-    });
+      });
 
-    naver.maps.Event.addListener(marker, "click", async () => {
-      map.setZoom(isSingle ? 17 : map.getZoom());
-      map.panTo(latlng);
-    
-      if (isSingle && hasPoint) {
-        const p = cluster.points[0];
-        setSelectedReport({
-          ...p,
-          title: "단일 제보",
-          category: "기타",
-        });
-      } else {
-        // ✅ 클러스터 중심 좌표로 대표 제보 fetch
-        try {
-          const res = await fetch(`/api/report/cluster-report?lat=${cluster.center.lat}&lng=${cluster.center.lng}`);
-          const report = await res.json();
+      naver.maps.Event.addListener(marker, "click", async () => {
+        map.setZoom(isSingle ? 17 : map.getZoom());
+        map.panTo(latlng);
 
-             // 📌 클러스터 정보 로그
-          console.log("📦 report 데이터:", report);
-    
-          setSelectedReport(report);
+        if (isSingle && hasPoint) {
+          const p = cluster.points[0];
+          setSelectedReport({
+            ...p,
+            title: "단일 제보",
+            category: "기타",
+          });
+        } else {
+          // ✅ 클러스터 중심 좌표로 대표 제보 fetch
+          try {
+            const res = await fetch(`/api/report/cluster-report?lat=${cluster.center.lat}&lng=${cluster.center.lng}`);
+            const report = await res.json();
 
-        } catch (err) {
-          console.error("❌ 클러스터 대표 제보 불러오기 실패", err);
+            // 📌 클러스터 정보 로그
+            console.log("📦 report 데이터:", report);
+
+            setSelectedReport(report);
+
+          } catch (err) {
+            console.error("❌ 클러스터 대표 제보 불러오기 실패", err);
+          }
         }
-      }
+      });
+
+      markersRef.current.push(marker);
     });
-
-    markersRef.current.push(marker);
-  });
-}, [reports]);
+  }, [reports]);
 
 
-// ✅ 현위치 이동
-const recenter = () => {
-  if (!navigator.geolocation || !mapRef.current) return;
+  // ✅ 현위치 이동
+  const recenter = () => {
+    if (!navigator.geolocation || !mapRef.current) return;
 
-  navigator.geolocation.getCurrentPosition((position) => {
-    const { latitude, longitude } = position.coords;
-    const latlng = new naver.maps.LatLng(latitude, longitude);
-    mapRef.current?.panTo(latlng);
-  });
-};
+    navigator.geolocation.getCurrentPosition((position) => {
+      const { latitude, longitude } = position.coords;
+      const latlng = new naver.maps.LatLng(latitude, longitude);
+      mapRef.current?.panTo(latlng);
+    });
+  };
 
-return (
-  <>
-    <Script
-      strategy="afterInteractive"
-      type="text/javascript"
-      src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.NEXT_PUBLIC_MAP_CLIENT_ID}`}
-      onReady={initializeMap}
-    />
-    <div id={mapId} style={{ width: "100%", height: "100%" }} />
+  return (
+    <>
+      <Script
+        strategy="afterInteractive"
+        type="text/javascript"
+        src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.NEXT_PUBLIC_MAP_CLIENT_ID}`}
+        onReady={initializeMap}
+      />
+      <div id={mapId} style={{ width: "100%", height: "100%" }} />
 
-    {enableRecenterButton && (
-      <button
-        type="button"
-        onClick={recenter}
-        className="fixed top-[20vh] right-[5vw]"
-      >
-        <Image src={Located} alt="현위치" width={40} height={40} />
-      </button>
-    )}
+      {enableRecenterButton && (
+        <button
+          type="button"
+          onClick={recenter}
+          className="fixed top-[20vh] right-[5vw]"
+        >
+          <Image src={Located} alt="현위치" width={40} height={40} />
+        </button>
+      )}
 
-    {selectedReport && (
-      <div className="fixed bottom-[12vh] w-full z-50 px-4 pb-4 pointer-events-none">
-        <Preview report={selectedReport} handleClose={setSelectedReport}/>
-      </div>
-    )}
-  </>
-);
+      {selectedReport && (
+        <div className="fixed bottom-[12vh] w-full z-50 px-4 pb-4 pointer-events-none">
+          <Preview report={selectedReport} handleClose={setSelectedReport} />
+        </div>
+      )}
+    </>
+  );
 }
