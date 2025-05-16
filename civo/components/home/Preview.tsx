@@ -59,21 +59,21 @@ export default function Preview({ report, handleClose }: { report: Report, handl
                 <Link
                     href={`/home/reportList/?id=${report.id}`}
                     className="rounded-l-xl cursor-pointer"
-                >   <div className="relative w-[30vh] aspect-[3/4] rounded-l-[10px]">
+                >   <div className="relative w-[40vw] aspect-[3/4] rounded-l-[10px]">
                         {/* 썸네일 이미지 */}
                         <Image
                             width={100}
                             height={100}
                             src={report.media_url || "/placeholder.png"}
                             alt="썸네일"
-                            className="w-full h-full object-cover object-center"
+                            className="h-full aspect-[3/4] object-cover object-center"
                         />
 
                         {/* 반투명 오버레이 */}
                         <div className="absolute inset-0 bg-black bg-opacity-20 z-10" />
 
                         {/* 👁️ 텍스트 오버레이 */}
-                        <div className="absolute top-[200px] right-[40px] z-20 flex items-center gap-[6px]">
+                        <div className="absolute pb-[100px] right-[40px] z-20 flex items-center gap-[6px]">
                             <Image
                                 src={reportImg}
                                 alt="신고 아이콘"
@@ -89,6 +89,13 @@ export default function Preview({ report, handleClose }: { report: Report, handl
                                 height={12}
                                 className="h-[12px] w-[15px]"
                             />
+                            <span className="text-white text-[11px] font-semibold">{viewCount}</span>
+                        </div>
+                        {/* 👁️ 아이콘·텍스트 오버레이 : 바깥 래퍼 좌표계 사용 → 클리핑 X */}
+                        <div className="absolute bottom-2 right-2 z-10 flex items-center gap-1">
+                            <Image src={reportImg} alt="" width={12} height={12} />
+                            <span className="text-white text-[11px] font-semibold">{userName}</span>
+                            <Image src={viewCountImg} alt="" width={15} height={12} />
                             <span className="text-white text-[11px] font-semibold">{viewCount}</span>
                         </div>
                     </div>
