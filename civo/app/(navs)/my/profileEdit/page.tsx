@@ -76,7 +76,6 @@ export default function ProfileEditPage() {
                 profile_image: url,
             }),
         });
-
     };
 
     return (

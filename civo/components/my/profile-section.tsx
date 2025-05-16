@@ -1,5 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+
+export async function logout() {
+  const supabase = createClientComponentClient();
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    console.error('❌ 로그아웃 실패:', error.message);
+  } else {
+    console.log('✅ 로그아웃 성공');
+    window.location.href = '/sign-in'; // 홈으로 리디렉션 (선택사항)
+  }
+}
+
 
 export function ProfileSection({ name, profile }: { name?: string, profile?: string }) {
   const isLoading = !name || !profile;
@@ -32,6 +46,9 @@ export function ProfileSection({ name, profile }: { name?: string, profile?: str
             프로필 수정하기
           </Link>
         </div>
+        <button onClick={logout} className="absolute text-[13px] right-[20px] text-gray-500">
+            로그아웃
+        </button>
       </div>
     </div>
   );
