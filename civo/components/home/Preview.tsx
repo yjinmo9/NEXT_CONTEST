@@ -51,7 +51,8 @@ export default function Preview({ report, handleClose }: { report: Report, handl
         }
         console.log("🔥 Preview 컴포넌트에서 받은 user_id:", report.user_id);
         fetchUserData(report.user_id || "")
-    }, [report.user_id])
+    }, [report.user_id, report.views]);
+
     return (
         <div className="bg-white max-h-[228px] overflow-hidden rounded-2xl shadow-lg pointer-events-auto max-w-md mx-auto drop-shadow-[0_0px_6px_rgba(0,0,0,0.15)]">
             <div className="flex">
