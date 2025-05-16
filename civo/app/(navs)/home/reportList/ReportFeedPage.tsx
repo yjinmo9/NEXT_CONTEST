@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback, use } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ClientReportDetail from './ClientReportDetail';
 
+
 export default function ReportFeedPage() {
     const searchParams = useSearchParams();
     const targetIdFromUrl = searchParams.get('id'); // 👈 URL에서 id 추출

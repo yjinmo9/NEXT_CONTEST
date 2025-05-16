@@ -68,7 +68,7 @@ export default function LocateSelector({ onLocateChange, name = "사고 위치 "
         if (!selectedLocation) return;
 
         const res = await fetch(
-            `/api/location?lat=${selectedLocation[1]}&lon=${selectedLocation[0]}`
+            `/api/location?lat=${selectedLocation[0]}&lon=${selectedLocation[1]}`
         );
         const data = await res.json();
 
