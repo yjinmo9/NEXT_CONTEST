@@ -51,6 +51,7 @@ export default function Map({
       logoControlOptions: {
         position: naver.maps.Position.BOTTOM_LEFT,
       },
+      customStyleId:"3e4f5b9e-1671-4b58-a2bc-fe641fddae0a"
     };
 
     const map = new window.naver.maps.Map(mapId, mapOptions);
