@@ -1,5 +1,30 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
+type LocationReport = {
+  id: string;
+  report_lat: number;
+  report_lng: number;
+  content: string;
+  created_at: string;
+  user_id?: string;
+  media_urls?: string[];
+  type: "incident" | "damage";
+  views: number;
+};
+
+type MissingReport = {
+  id: string;
+  missing_lat: number;
+  missing_lng: number;
+  content: string;
+  created_at: string;
+  user_id?: string;
+  media_urls?: string[];
+  type: "missing";
+  views: number;
+};
+
+type Report = LocationReport | MissingReport;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -12,7 +37,7 @@ export async function GET(req: Request) {
   // 1️⃣ incident / damage → report_lat/lng 기준
   const { data: reportData, error: reportError } = await supabase
     .from("reports")
-    .select("id, report_lat, report_lng, content, created_at, user_id, type")
+    .select("id, report_lat, report_lng, content, created_at, user_id, media_urls, type, views")
     .in("type", ["incident", "damage"])
     .filter("report_lat", "gte", lat - delta)
     .filter("report_lat", "lte", lat + delta)
@@ -22,7 +47,7 @@ export async function GET(req: Request) {
   // 2️⃣ missing → missing_lat/lng 기준
   const { data: missingData, error: missingError } = await supabase
     .from("reports")
-    .select("id, missing_lat, missing_lng, content, created_at, user_id, type")
+    .select("id, missing_lat, missing_lng, content, created_at, user_id, media_urls, type, views")
     .eq("type", "missing")
     .filter("missing_lat", "gte", lat - delta)
     .filter("missing_lat", "lte", lat + delta)
@@ -43,20 +68,20 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "제보 없음" }, { status: 404 });
   }
 
-  const r = allData[0];
+  const r:Report = allData[0];
 
-  const isReportType = (data: typeof r): data is { report_lat: number; report_lng: number; id: any; content: any; created_at: any; user_id: any; type: any } =>
-    "report_lat" in data && "report_lng" in data;
-
+  function isLocationReport(report: Report): report is LocationReport {
+    return report.type === "incident" || report.type === "damage";
+  }
   return NextResponse.json({
     id: r.id,
-    report_lat: "missing_lat" in r ? r.missing_lat : r.report_lat,
-    report_lng: "missing_lng" in r ? r.missing_lng : r.report_lng,
+    report_lat: isLocationReport(r) ? r.report_lat : r.missing_lat,
+    report_lng: isLocationReport(r) ? r.report_lng : r.missing_lng,
     content: r.content,
     created_at: r.created_at,
     user_id: r.user_id ?? "익명",
-    type: r.type,
-    // ❌ media_url 필드 완전 제거
+    media_url: r.media_urls?.[0] ?? "/placeholder.png",
+    views: r.views ?? 0,
   });
 }
 

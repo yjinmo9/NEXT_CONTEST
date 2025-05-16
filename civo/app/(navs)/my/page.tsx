@@ -11,7 +11,7 @@ export default function MyPage() {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClientComponentClient();
-  const [user_id, setUserId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [username, setUserName] = useState<string>("익명");
   const [profileImage, setProfileImage] = useState<string>();
 
@@ -52,11 +52,11 @@ export default function MyPage() {
       }
     } 
     async function fetchUserInfo() {
-      const userId = await getUserIdAction();
+      const uid = await getUserIdAction();
 
-      setUserId(userId || "익명"); // ✅ 여기서 바로 user.id 사용
+      setUserId(uid || "익명"); // ✅ 여기서 바로 user.id 사용
 
-      const res = await fetch(`/api/user?uid=${userId}`)
+      const res = await fetch(`/api/user?uid=${uid}`)
       const data = await res.json();
       console.log("🔥 사용자 정보:", data);
 
@@ -75,7 +75,7 @@ export default function MyPage() {
   return (
     <div className="w-full z-30 bg-white min-h-screen">
       <ProfileSection name={username || "이름이 없습니다."} profile={profileImage} />
-      <ReputationSection />
+      {userId && <ReputationSection userId={userId} />}
       <ReportSection reports={reports} isLoading={loading} />
     </div>
   );

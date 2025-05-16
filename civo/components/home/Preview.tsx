@@ -1,7 +1,9 @@
 import Link from "next/link";
 import reportImg from '@/src/img/reporter.png';
+import viewCountImg from '@/public/img/viewCount.png';
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { formatToKSTWithTime } from "@/utils/utils";
 
 type Report = {
     id?: string;
@@ -12,9 +14,10 @@ type Report = {
     title?: string;
     category?: string;
     media_url: string;
-    created_at?: string;
+    created_at: string;
     content?: string;
     user_id?: string;
+    views: number;
 };
 
 type userData = {
@@ -28,6 +31,7 @@ type userData = {
 export default function Preview({ report, handleClose }: { report: Report, handleClose: (report: null) => void }) {
     const [userName, setUserName] = useState<string>("익명");
     const [profileImage, setProfileImage] = useState<string>();
+    const [viewCount, setViewCount] = useState<number>(0);
 
     useEffect(() => {
 
@@ -43,34 +47,52 @@ export default function Preview({ report, handleClose }: { report: Report, handl
             }
             setProfileImage(userData.profile_image ?? null);
             setUserName(userData.name ?? '익명');
+            setViewCount((report.views || 0) + 1);
         }
         console.log("🔥 Preview 컴포넌트에서 받은 user_id:", report.user_id);
         fetchUserData(report.user_id || "")
-    }, [report.user_id])
+    }, [report.user_id, report.views]);
+
     return (
         <div className="bg-white max-h-[228px] overflow-hidden rounded-2xl shadow-lg pointer-events-auto max-w-md mx-auto drop-shadow-[0_0px_6px_rgba(0,0,0,0.15)]">
             <div className="flex">
                 <Link
                     href={`/home/reportList/?id=${report.id}`}
-                    className="overflow-hidden rounded-l-xl cursor-pointer"
-                >
-                    <Image
-                        width={100}
-                        height={100}
-                        src={report.media_url || "/placeholder.png"}
-                        alt="썸네일"
-                        className="w-[30vh] aspect-[3/4] object-cover object-center"
-                    />
-                    <div className="flex gap-[4px] absolute bottom-[10px] left-[80px] justify-center items-center">
+                    className="rounded-l-xl cursor-pointer"
+                >   <div className="relative w-[30vh] aspect-[3/4] rounded-l-[10px]">
+                        {/* 썸네일 이미지 */}
                         <Image
-                            src={reportImg}
-                            alt="신고 아이콘"
-                            width={10}
-                            height={10}
-                            className="h-[10px] opacity-100" />
-                        <div className="text-white text-[11px] font-semibold">{userName}</div>
-                        {/*여기 조회수*/}
+                            width={100}
+                            height={100}
+                            src={report.media_url || "/placeholder.png"}
+                            alt="썸네일"
+                            className="w-full h-full object-cover object-center"
+                        />
+
+                        {/* 반투명 오버레이 */}
+                        <div className="absolute inset-0 bg-black bg-opacity-20 z-10" />
+
+                        {/* 👁️ 텍스트 오버레이 */}
+                        <div className="absolute top-[200px] right-[40px] z-20 flex items-center gap-[6px]">
+                            <Image
+                                src={reportImg}
+                                alt="신고 아이콘"
+                                width={12}
+                                height={12}
+                                className="h-[12px] w-[12px]"
+                            />
+                            <span className="text-white text-[11px] font-semibold">{userName}</span>
+                            <Image
+                                src={viewCountImg}
+                                alt="조회수 아이콘"
+                                width={20}
+                                height={12}
+                                className="h-[12px] w-[15px]"
+                            />
+                            <span className="text-white text-[11px] font-semibold">{viewCount}</span>
+                        </div>
                     </div>
+
 
                 </Link>
                 <div className="flex flex-col gap-2 p-4">
@@ -86,7 +108,7 @@ export default function Preview({ report, handleClose }: { report: Report, handl
                     </div>
                     <div>
                         <p className="text-[11px] font-semibold">{report.title}</p>
-                        <p className="text-[8px]">{report.created_at || "날짜 없음"}</p>
+                        <p className="text-[8px]">{formatToKSTWithTime(report.created_at) || "날짜 없음"}</p>
                     </div>
                     <p className="text-xs text-gray-700 mt-1 line-clamp-2">{report.content || "설명이 없습니다."}</p>
                 </div>

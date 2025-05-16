@@ -14,7 +14,6 @@ export default function ProfileEditPage() {
     const [userName, setUserName] = useState<string>("익명");
     const [userEmail, setUserEmail] = useState<string>("이메일 없음");
     const [userPhone, setUserPhone] = useState<string>("전화번호 없음");
-    const [userProfileImage, setUserProfileImage] = useState<string | null>(null);
 
     useEffect(() => {
         async function fetchUserInfo() {
@@ -24,7 +23,7 @@ export default function ProfileEditPage() {
 
             console.log("🔥 현재 사용자 ID:", userId);
 
-            const res = await fetch(`/api/user/${userId}`)
+            const res = await fetch(`/api/user?uid=${userId}`)
             const data = await res.json();
             console.log("🔥 사용자 정보:", data);
 
@@ -32,6 +31,7 @@ export default function ProfileEditPage() {
                 setUserName(data.name);
                 setUserEmail(data.email);
                 setUserPhone(data.phone);
+                setPreviewUrl(data.profile_image);
             } else {
                 console.warn("⚠️ 사용자 정보가 비어 있음");
             }
@@ -41,8 +41,8 @@ export default function ProfileEditPage() {
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
         if (selectedFile) {
-            setPreviewUrl(URL.createObjectURL(selectedFile));
             setFile(selectedFile);
+            setPreviewUrl(URL.createObjectURL(selectedFile));
         }
     };
 
@@ -58,7 +58,6 @@ export default function ProfileEditPage() {
         const result = await res.json();
         if (res.ok) {
             alert("✅ 저장 완료: " + result.url);
-            setUserProfileImage(result.url);
         } else {
             alert("❌ 저장 실패: " + result.error);
         }
@@ -72,12 +71,11 @@ export default function ProfileEditPage() {
             },
             body: JSON.stringify({
                 name: formData.get("name") || userName,
-                email: formData.get("email") || userEmail,  
+                email: formData.get("email") || userEmail,
                 phone: formData.get("phone") || userPhone,
                 profile_image: url,
             }),
         });
-
     };
 
     return (
@@ -86,7 +84,9 @@ export default function ProfileEditPage() {
 
             {/* 프로필 이미지 */}
             <div className="relative w-[114px] aspect-square mx-auto rounded-full mb-6">
-                <img
+                <Image
+                    width={100}
+                    height={100}
                     src={previewUrl}
                     alt="프로필"
                     className="w-full h-full object-cover object-center rounded-full"
