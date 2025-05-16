@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       'https://maps.apigw.ntruss.com/map-reversegeocode/v2/gc',
       {
         params: {
-          coords: `${lon},${lat}`, // 반드시 x(경도),y(위도)
+          coords: `${lat},${lon}`, // 반드시 x(경도),y(위도)
           output: 'json',
           orders: 'roadaddr',
         },
