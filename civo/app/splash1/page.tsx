@@ -25,13 +25,13 @@ export default function Splash1() {
 
   // 최종 위치 좌표 (left-1/2, top-1/2 기준)
   const targetPositions = [
-    { x: 35, y: -60 }, // C
+    { x: 25, y: -40 }, // C
     { x: 25, y: -30 },  // I
-    { x: -10, y: 10 },   // V
-    { x: -30, y: -60 },   //0
+    { x: -7, y: 10 },   // V
+    { x: -18, y: -40 },   //0
   ];
 
-  const initialOffsets = [22, 10, 2, -10]; // 중앙 기준 오프셋
+  const initialOffsets = [ 18, 10, 2, -10]; // 중앙 기준 오프셋
 
   const initialY = 40;
 
@@ -56,7 +56,7 @@ export default function Splash1() {
       {/* ✅ CIVO */}
       {showCivo && (
         <motion.div
-        className="relative w-full h-[200px] z-10 flex justify-center gap-[10px] text-5xl font-black"
+          className="absolute flex gap-2 text-5xl font-black z-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
@@ -85,4 +85,7 @@ export default function Splash1() {
       )}
     </div>
   );
-} 
+}  
+
+
+
