@@ -11,18 +11,31 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "reportId is required" }, { status: 400 });
   }
 
-  // 조회수 증가
+  // 1️⃣ 현재 조회수 가져오기
+  const { data: currentData, error: fetchError } = await supabase
+    .from("reports")
+    .select("views")
+    .eq("id", reportId)
+    .maybeSingle();
+
+  if (fetchError || !currentData) {
+    return NextResponse.json({ error: "조회수 불러오기 실패" }, { status: 500 });
+  }
+
+  const newViews = (currentData.views || 0) + 1;
+
+  // 2️⃣ 조회수 증가
   const { data, error } = await supabase
-    .from("reports") // ⚠️ 테이블 이름 정확히!
-    .update({ views: (prev: any) => prev.views + 1 })
+    .from("reports")
+    .update({ views: newViews })
     .eq("id", reportId)
     .select("views")
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("❌ 조회수 업데이트 실패:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ views: data.views });
+  return NextResponse.json({ views: data?.views });
 }

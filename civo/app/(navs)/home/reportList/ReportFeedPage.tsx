@@ -49,12 +49,12 @@ export default function ReportFeedPage() {
         console.log('📦 로드된 길이:', resultLength);
 
         setRadius(resultRadius);
-        setLength(resultLength+3);
+        setLength(resultLength + 3);
         console.log('📦 로드된 ID들:', ids);
 
         // ✅ 중복 확인
         setReports((prev) => {
-            const uniqueNewIds = ids.filter((id:string) => !prev.includes(id));
+            const uniqueNewIds = ids.filter((id: string) => !prev.includes(id));
             const newState = Array.from(new Set([...prev, ...uniqueNewIds]));
 
             // ✅ 모든 아이디가 중복일 경우
@@ -77,14 +77,54 @@ export default function ReportFeedPage() {
                     loadMoreReports();
                 }
             },
-            { 
+            {
                 threshold: 1,
                 rootMargin: '400% 0px'
-             }
+            }
         );
         observer.observe(loaderRef.current);
         return () => observer.disconnect();
     }, [loadMoreReports]);
+    useEffect(() => {
+        const observers: IntersectionObserver[] = [];
+        const viewed = new Set<string>(); // 이미 본 게시글 id 추적
+
+        Object.entries(reportRefs.current).forEach(([id, el]) => {
+            if (!el || viewed.has(id)) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                const entry = entries[0];
+                if (entry.isIntersecting && !viewed.has(id)) {
+                    viewed.add(id); // 중복 조회 방지
+
+                    // 👁️ 조회수 증가 API 호출
+                    fetch("/api/home/update-views", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ reportId: id })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            console.log(`👁️ 조회수 업데이트됨 - ID: ${id}, 현재 조회수: ${data.views}`);
+                        })
+                        .catch(err => {
+                            console.error("조회수 업데이트 중 오류 발생:", err);
+                        });
+                }
+            }, {
+                threshold: 0.5 // 50% 이상 보여질 때 실행
+            });
+
+            observer.observe(el);
+            observers.push(observer);
+        });
+
+        return () => {
+            observers.forEach(observer => observer.disconnect());
+        };
+    }, [reports]);
 
     return (
         <div className="w-full z-30 bg-white min-h-screen py-4 max-w-md mx-auto">
