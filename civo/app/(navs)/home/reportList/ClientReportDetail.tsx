@@ -28,7 +28,7 @@ export default function ClientReportDetail({ id }: { id: string }) {
   useEffect(() => {
     async function fetchReport() {
       try {
-        const res = await fetch(`/api/home/${id}`);
+        const res = await fetch(`/api/home/reportGet?id=${id}`);
         const data = await res.json();
 
         if (!res.ok) {
@@ -46,7 +46,6 @@ export default function ClientReportDetail({ id }: { id: string }) {
     fetchReport();
   }, [id]);
 
-  if (loading) return <p className="p-4">로딩 중...</p>;
   if (error) return <p className="p-4 text-red-500"></p>;
   if (!report) return <p className="p-4">데이터가 없습니다.</p>;
 

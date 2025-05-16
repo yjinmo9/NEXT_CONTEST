@@ -6,6 +6,8 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const uid = searchParams.get("uid");
 
+  console.log("🔥 uid:", uid);
+
   const { data, error } = await supabase
     .from("users")
     .select("*")
