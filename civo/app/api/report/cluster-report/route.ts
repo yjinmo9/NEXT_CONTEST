@@ -1,6 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-import { data as autoprefixerData } from "autoprefixer";
-import { error } from "console";
 import { NextResponse } from "next/server";
 type LocationReport = {
   id: string;
@@ -59,7 +57,6 @@ export async function GET(req: Request) {
   // 3️⃣ 두 결과 합치기
   const allData = [...(reportData ?? []), ...(missingData ?? [])];
 
-
   if (reportError || missingError) {
     const supabaseError = reportError || missingError;
     console.error("❌ Supabase 에러:", supabaseError?.message || "Unknown error");
@@ -87,4 +84,5 @@ export async function GET(req: Request) {
     views: r.views ?? 0,
   });
 }
+
 
