@@ -45,7 +45,7 @@ export default function MapWithFixedMarkerOverlay({
 
     return (
         <div className="relative w-full h-full">
-            <Map loc={loc} onReady={handleMapReady} enableRecenterButton={true} />
+            <Map loc={loc} onReady={handleMapReady} enableRecenterButton={true}/>
             <div className="absolute top-1/2 left-1/2 z-10 transform -translate-x-1/2 -translate-y-full flex flex-col items-center">
                 <div className="mb-2 w-[300px] text-center bg-white px-4 py-3 rounded-xl shadow-lg drop-shadow-md border border-[1px] border-gray-description">
                     <p className="text-sm text-black">

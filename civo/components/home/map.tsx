@@ -6,18 +6,18 @@ import Image from "next/image";
 import Located from "@/src/img/located.png";
 
 type Report = {
-    id?: string;
-    type: string;
-    report_lat: number;
-    report_lng: number;
-    distance_m?: number | null;
-    title?: string;
-    category?: string;
-    media_url: string;
-    created_at: string;
-    content?: string;
-    user_id?: string;
-    views: number;
+  id?: string;
+  type: string;
+  report_lat: number;
+  report_lng: number;
+  distance_m?: number | null;
+  title?: string;
+  category?: string;
+  media_url: string;
+  created_at: string;
+  content?: string;
+  user_id?: string;
+  views: number;
 };
 
 
@@ -50,7 +50,7 @@ export default function Map({
   onReady?: (map: naver.maps.Map) => void;
   enableRecenterButton?: boolean;
   reports?: Cluster[];
-  onSelectReport : (report:Report) => void;
+  onSelectReport?: (report: Report) => void;
 }) {
   const mapRef = useRef<NaverMap | null>(null);
   const markersRef = useRef<naver.maps.Marker[]>([]);
@@ -100,57 +100,57 @@ export default function Map({
         ? new naver.maps.LatLng(cluster.points[0].lat, cluster.points[0].lng)
         : new naver.maps.LatLng(cluster.center.lat, cluster.center.lng);
 
-        const getMixedColor = (types: Set<string>): string => {
-          const has = (t: string) => types.has(t);
-          const t = { m: has("missing"), i: has("incident"), d: has("damage") };
-        
-          if (t.m && t.i && t.d) return "#8b5cf6";   // all 3 → 연한 보라
-          if (t.m && t.i)        return "#c4b5fd";   // 빨 + 파 → 연보라
-          if (t.i && t.d)        return "#84cc16";   // 파 + 노 → 민트
-          if (t.m && t.d)        return "#fb923c";   // 빨 + 노 → 살구
-          if (t.m)               return "#fb7185";   // 빨강 → 연 형광 레드
-          if (t.i)               return "#38bdf8";   // 파랑 → 스카이블루
-          if (t.d)               return "#fde047";   // 노랑 → 레몬옐로우
-          return "#e5e7eb";                          // fallback → 연회색
-        };
-      
-        const types = new Set(
-          Array.isArray(cluster.points)
-            ? cluster.points.map((p: any) => p.type)
-            : [cluster.report?.type]
-        );
-        const color = getMixedColor(types);
+      const getMixedColor = (types: Set<string>): string => {
+        const has = (t: string) => types.has(t);
+        const t = { m: has("missing"), i: has("incident"), d: has("damage") };
 
-        // 예시: cluster.count가 클수록 마커 크기도 커지게
-        const count = Number(cluster.count);
+        if (t.m && t.i && t.d) return "#8b5cf6";   // all 3 → 연한 보라
+        if (t.m && t.i) return "#c4b5fd";   // 빨 + 파 → 연보라
+        if (t.i && t.d) return "#84cc16";   // 파 + 노 → 민트
+        if (t.m && t.d) return "#fb923c";   // 빨 + 노 → 살구
+        if (t.m) return "#fb7185";   // 빨강 → 연 형광 레드
+        if (t.i) return "#38bdf8";   // 파랑 → 스카이블루
+        if (t.d) return "#fde047";   // 노랑 → 레몬옐로우
+        return "#e5e7eb";                          // fallback → 연회색
+      };
+
+      const types = new Set(
+        Array.isArray(cluster.points)
+          ? cluster.points.map((p: any) => p.type)
+          : [cluster.report?.type]
+      );
+      const color = getMixedColor(types);
+
+      // 예시: cluster.count가 클수록 마커 크기도 커지게
+      const count = Number(cluster.count);
 
 
-        // ✅ 현재 지도 줌 레벨 가져오기
-        const zoom = map.getZoom();
+      // ✅ 현재 지도 줌 레벨 가져오기
+      const zoom = map.getZoom();
 
-        // ✅ 줌 레벨 보정 팩터: 줌 15을 기준 (1.1의 거듭제곱)
-        const zoomFactor = Math.pow(1.1, zoom - 15);
+      // ✅ 줌 레벨 보정 팩터: 줌 15을 기준 (1.1의 거듭제곱)
+      const zoomFactor = Math.pow(1.1, zoom - 15);
 
-        // ✅ 클러스터 개수 기반 + 줌 비례한 마커 크기
-        const baseSize = 32;
-        const rawSize = Math.sqrt(count) * 10 + baseSize;
-        const finalSize = isSingle ? baseSize : Math.min(rawSize * zoomFactor * 3, 12000);
-        const innerSize = isSingle ? baseSize : finalSize * 0.5;
+      // ✅ 클러스터 개수 기반 + 줌 비례한 마커 크기
+      const baseSize = 32;
+      const rawSize = Math.sqrt(count) * 10 + baseSize;
+      const finalSize = isSingle ? baseSize : Math.min(rawSize * zoomFactor * 3, 12000);
+      const innerSize = isSingle ? baseSize : finalSize * 0.5;
 
-        // ✅ 디버깅 로그
-        console.log(
-          `🧠 count: ${count}, zoom: ${zoom}, zoomFactor: ${zoomFactor.toFixed(2)}, finalSize: ${finalSize.toFixed(1)}`
-        );
+      // ✅ 디버깅 로그
+      console.log(
+        `🧠 count: ${count}, zoom: ${zoom}, zoomFactor: ${zoomFactor.toFixed(2)}, finalSize: ${finalSize.toFixed(1)}`
+      );
 
-        if (isSingle && zoom <= 11) return; // 이 마커 안 그리기
-       
-      
-        const marker = new naver.maps.Marker({
-          map,
-          position: latlng,
-          icon: isSingle
-            ? {
-                content: `
+      if (isSingle && zoom <= 11) return; // 이 마커 안 그리기
+
+
+      const marker = new naver.maps.Marker({
+        map,
+        position: latlng,
+        icon: isSingle
+          ? {
+            content: `
                   <div style="
                     width: ${finalSize}px;
                     height: ${finalSize}px;
@@ -162,11 +162,11 @@ export default function Map({
                     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
                   "></div>
                 `,
-                size: new naver.maps.Size(finalSize, finalSize),
-                anchor: new naver.maps.Point(finalSize / 2, finalSize / 2),
-              }
-            : {
-                content: `
+            size: new naver.maps.Size(finalSize, finalSize),
+            anchor: new naver.maps.Point(finalSize / 2, finalSize / 2),
+          }
+          : {
+            content: `
                   <div style="position: relative; width: ${finalSize}px; height: ${finalSize}px;">
                     <!-- 연한 외곽 큰 원 -->
                     <div style="
@@ -201,12 +201,12 @@ export default function Map({
                     </div>
                   </div>
                 `,
-                size: new naver.maps.Size(finalSize, finalSize),
-                anchor: new naver.maps.Point(finalSize / 2, finalSize / 2),
-              }
-        });
-        
-      
+            size: new naver.maps.Size(finalSize, finalSize),
+            anchor: new naver.maps.Point(finalSize / 2, finalSize / 2),
+          }
+      });
+
+
 
       naver.maps.Event.addListener(marker, "click", async () => {
         map.setZoom(isSingle ? 17 : map.getZoom());
@@ -222,8 +222,10 @@ export default function Map({
 
             // 📌 클러스터 정보 로그
             console.log("📦 report 데이터:", report);
+            if (onSelectReport) {
+              onSelectReport(report);
+            }
 
-            onSelectReport(report);
 
           } catch (err) {
             console.error("❌ 클러스터 대표 제보 불러오기 실패", err);
