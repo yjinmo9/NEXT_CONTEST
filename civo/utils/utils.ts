@@ -30,3 +30,16 @@ export function formatToKSTWithTime(isoString: string): string {
 
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 }
+
+export function formatToKST(isoString: string): string {
+  const date = new Date(isoString);
+
+  // UTC 기준에서 KST (+9시간)로 변환
+  const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+
+  const year = kstDate.getFullYear();
+  const month = String(kstDate.getMonth() + 1).padStart(2, '0');
+  const day = String(kstDate.getDate()).padStart(2, '0');
+
+  return `${year}.${month}.${day}`;
+}
