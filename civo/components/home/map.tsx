@@ -15,6 +15,7 @@ const mapId = "naver-map";
 const DEFAULT_COORDINATES: Coordinates = [126.9784147, 37.5666805];
 
 type Cluster = {
+  [x: string]: any;
   cluster_id: number;
   count: number;
   center: { lat: number; lng: number };
@@ -83,15 +84,14 @@ export default function Map({
         ? new naver.maps.LatLng(cluster.points[0].lat, cluster.points[0].lng)
         : new naver.maps.LatLng(cluster.center.lat, cluster.center.lng);
 
-        const getClusterColor = (count: number) => {
-          if (count >= 100) return "#fde047";
-          if (count >= 50) return "#f87171";
-          if (count >= 20) return "#fb923c";
-          if (count >= 10) return "#60a5fa";
-          return "#a78bfa";
+        const getTypeColor = (type: string) => {
+          if (type === "missing") return "#f87171";    // 빨간색
+          if (type === "incident") return "#60a5fa";   // 파란색
+          if (type === "damage") return "#a78bfa";     // 보라색
+          return "#9ca3af";                            // 회색 (unknown)
         };
       
-        const color = getClusterColor(cluster.count);
+        const color = getTypeColor(cluster.report.type);
 
         // 예시: cluster.count가 클수록 마커 크기도 커지게
         const count = Number(cluster.count);
@@ -127,7 +127,7 @@ export default function Map({
                     width: ${finalSize}px;
                     height: ${finalSize}px;
                     border-radius: 50%;
-                    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+                    background-color: ${color}; // ✅ 여기로 수정
                     display: flex;
                     justify-content: center;
                     align-items: center;
