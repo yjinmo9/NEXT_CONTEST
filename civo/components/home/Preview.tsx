@@ -2,7 +2,7 @@ import Link from "next/link";
 import reportImg from '@/src/img/reporter.png';
 import viewCountImg from '@/public/img/viewCount.png';
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatToKSTWithTime } from "@/utils/utils";
 
 type Report = {
@@ -33,6 +33,8 @@ export default function Preview({ report, handleClose }: { report: Report, handl
     const [profileImage, setProfileImage] = useState<string>();
     const [viewCount, setViewCount] = useState<number>(0);
 
+    const ref = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
 
         const fetchUserData = async (userId: string) => {
@@ -53,8 +55,21 @@ export default function Preview({ report, handleClose }: { report: Report, handl
         fetchUserData(report.user_id || "")
     }, [report.user_id, report.views]);
 
+    useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        handleClose(null); // 외부 클릭 시 닫기
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
     return (
-        <div className="bg-white max-h-[228px] overflow-hidden rounded-2xl shadow-lg pointer-events-auto max-w-md mx-auto drop-shadow-[0_0px_6px_rgba(0,0,0,0.15)]">
+        <div ref={ref} className="bg-white max-h-[228px] overflow-hidden rounded-2xl shadow-lg pointer-events-auto max-w-md mx-auto drop-shadow-[0_0px_6px_rgba(0,0,0,0.15)]">
             <div className="flex">
                 <Link
                     href={`/home/reportList/?id=${report.id}`}

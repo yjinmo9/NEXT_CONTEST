@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import EditableField from "@/components/my/editableField"; // 경로는 프로젝트 구조에 맞게 수정
 import { getUserIdAction } from "@/app/actions";
-import { profile } from "console";
 
 export default function ProfileEditPage() {
     const [previewUrl, setPreviewUrl] = useState("/img/ProfileAnon.png");
@@ -57,7 +56,7 @@ export default function ProfileEditPage() {
 
         const result = await res.json();
         if (res.ok) {
-            alert("✅ 저장 완료: " + result.url);
+            alert("저장되었습니다.");
         } else {
             alert("❌ 저장 실패: " + result.error);
         }
