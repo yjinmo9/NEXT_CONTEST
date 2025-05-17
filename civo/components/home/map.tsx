@@ -4,7 +4,22 @@ import Script from "next/script";
 import { useCallback, useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import Located from "@/src/img/located.png";
-import Preview from "./Preview";
+
+type Report = {
+    id?: string;
+    type: string;
+    report_lat: number;
+    report_lng: number;
+    distance_m?: number | null;
+    title?: string;
+    category?: string;
+    media_url: string;
+    created_at: string;
+    content?: string;
+    user_id?: string;
+    views: number;
+};
+
 
 export type NaverMap = naver.maps.Map;
 type Lng = number;
@@ -29,15 +44,16 @@ export default function Map({
   onReady,
   enableRecenterButton = false,
   reports = [],
+  onSelectReport,
 }: {
   loc?: Coordinates;
   onReady?: (map: naver.maps.Map) => void;
   enableRecenterButton?: boolean;
   reports?: Cluster[];
+  onSelectReport : (report:Report) => void;
 }) {
   const mapRef = useRef<NaverMap | null>(null);
   const markersRef = useRef<naver.maps.Marker[]>([]);
-  const [selectedReport, setSelectedReport] = useState<any>(null);
 
   // ✅ 지도 초기화
   const initializeMap = useCallback(() => {
@@ -186,11 +202,6 @@ export default function Map({
 
         if (isSingle && hasPoint) {
           const p = cluster.points[0];
-          setSelectedReport({
-            ...p,
-            title: "단일 제보",
-            category: "기타",
-          });
         } else {
           // ✅ 클러스터 중심 좌표로 대표 제보 fetch
           try {
@@ -200,7 +211,7 @@ export default function Map({
             // 📌 클러스터 정보 로그
             console.log("📦 report 데이터:", report);
 
-            setSelectedReport(report);
+            onSelectReport(report);
 
           } catch (err) {
             console.error("❌ 클러스터 대표 제보 불러오기 실패", err);
@@ -242,12 +253,6 @@ export default function Map({
         >
           <Image src={Located} alt="현위치" width={40} height={40} />
         </button>
-      )}
-
-      {selectedReport && (
-        <div className="fixed bottom-[12vh] w-full z-50 px-4 pb-4 pointer-events-none">
-          <Preview report={selectedReport} handleClose={setSelectedReport} />
-        </div>
       )}
     </>
   );

@@ -3,6 +3,21 @@
 import { useEffect, useState } from "react";
 import Map from "./map";
 
+type Report = {
+    id?: string;
+    type: string;
+    report_lat: number;
+    report_lng: number;
+    distance_m?: number | null;
+    title?: string;
+    category?: string;
+    media_url: string;
+    created_at: string;
+    content?: string;
+    user_id?: string;
+    views: number;
+};
+
 export type NaverMap = naver.maps.Map;
 type Lng = number;
 type Lat = number;
@@ -15,7 +30,7 @@ type Cluster = {
   points: { lat: number; lng: number }[];
 };
 
-export default function Navermap() {
+export default function Navermap({onSelectReport}:{onSelectReport:(report:Report) => void}) {
   const [loc, setLoc] = useState<Coordinates | null>(null);
   const [clusters, setClusters] = useState<Cluster[]>([]);
 
@@ -50,7 +65,7 @@ export default function Navermap() {
 
   return (
     <div className="w-full h-full">
-      <Map loc={loc} reports={clusters} onReady={handleMapReady} />
+      <Map loc={loc} reports={clusters} onReady={handleMapReady} onSelectReport={onSelectReport}/>
     </div>
   );
 }

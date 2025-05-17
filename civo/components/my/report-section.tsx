@@ -1,6 +1,7 @@
 'use client'
 
 import Image from "next/image";
+import { formatToKST } from "@/utils/utils";
 
 interface Report {
   id: number;
@@ -42,7 +43,7 @@ export function ReportSection({ reports, isLoading }: ReportSectionProps) {
                 </div>
                 <div>
                   <h3 className="text-[14px] font-medium">{report.title}</h3>
-                  <p className="text-[12px] text-gray-500 mt-[2px]">{report.created_at}</p>
+                  <p className="text-[12px] text-gray-500 mt-[2px]">{formatToKST(report.created_at)}</p>
                 </div>
               </div>
             ))
