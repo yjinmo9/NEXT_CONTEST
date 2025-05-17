@@ -84,14 +84,26 @@ export default function Map({
         ? new naver.maps.LatLng(cluster.points[0].lat, cluster.points[0].lng)
         : new naver.maps.LatLng(cluster.center.lat, cluster.center.lng);
 
-        const getTypeColor = (type: string) => {
-          if (type === "missing") return "#f87171";    // 빨간색
-          if (type === "incident") return "#60a5fa";   // 파란색
-          if (type === "damage") return "#a78bfa";     // 보라색
-          return "#9ca3af";                            // 회색 (unknown)
+        const getMixedColor = (types: Set<string>): string => {
+          const has = (t: string) => types.has(t);
+          const t = { m: has("missing"), i: has("incident"), d: has("damage") };
+        
+          if (t.m && t.i && t.d) return "#8b5cf6";   // all 3 → 연한 보라
+          if (t.m && t.i)        return "#c4b5fd";   // 빨 + 파 → 연보라
+          if (t.i && t.d)        return "#84cc16";   // 파 + 노 → 민트
+          if (t.m && t.d)        return "#fb923c";   // 빨 + 노 → 살구
+          if (t.m)               return "#fb7185";   // 빨강 → 연 형광 레드
+          if (t.i)               return "#38bdf8";   // 파랑 → 스카이블루
+          if (t.d)               return "#fde047";   // 노랑 → 레몬옐로우
+          return "#e5e7eb";                          // fallback → 연회색
         };
       
-        const color = getTypeColor(cluster.report.type);
+        const types = new Set(
+          Array.isArray(cluster.points)
+            ? cluster.points.map((p: any) => p.type)
+            : [cluster.report?.type]
+        );
+        const color = getMixedColor(types);
 
         // 예시: cluster.count가 클수록 마커 크기도 커지게
         const count = Number(cluster.count);

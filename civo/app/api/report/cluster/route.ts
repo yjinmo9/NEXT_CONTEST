@@ -81,6 +81,7 @@ export async function GET(req: Request) {
       cluster_id: i,
       count: clusterPoints.length,
       center: { lat: centerLat, lng: centerLng },
+      points: clusterPoints, // ✅ 여기에 type 포함됨
       thumbnail: representative.media_url,
       report: {
         id: representative.id,
