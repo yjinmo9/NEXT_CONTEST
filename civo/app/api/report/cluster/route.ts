@@ -52,6 +52,7 @@ export async function GET(req: Request) {
     })
     .map((item) => ({
       id: item.id,
+      type: item.type, // ✅ type을 포함시켜야 함
       lat: item.type === 'missing' ? item.missing_lat : item.report_lat,
       lng: item.type === 'missing' ? item.missing_lng : item.report_lng,
       media_url: item.media_urls?.[0] ?? "/placeholder.png",
@@ -85,7 +86,8 @@ export async function GET(req: Request) {
         id: representative.id,
         user_id: representative.user_id,
         content: representative.content,
-        created_at: representative.created_at
+        created_at: representative.created_at,
+        type: representative.type, // ✅ 여기를 추가
       }
     };
   });
@@ -102,7 +104,8 @@ export async function GET(req: Request) {
           id: point.id,
           user_id: point.user_id,
           content: point.content,
-          created_at: point.created_at
+          created_at: point.created_at,
+          type: point.type   // ✅ 여기도!
         }
       });
     }
