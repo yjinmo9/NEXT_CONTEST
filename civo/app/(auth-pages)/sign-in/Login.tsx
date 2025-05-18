@@ -45,12 +45,8 @@ export default function Login() {
       </div>
       <a
         href="/api/auth/kakao/login"
-        className="flex items-center justify-center gap-2
-             bg-[#FEE500] hover:bg-[#ffd400] text-[#381C1C]
-             font-semibold py-2 rounded-md"
       >
-        <Image src="/img/kakao_login_medium_narrow.png" alt="" width={20} height={20} />
-        카카오로 로그인
+        <Image src="/img/kakao_login_medium_narrow.png" alt="" width={150} height={150} />
       </a>
 
       <p className="text-sm text-gray-600">
