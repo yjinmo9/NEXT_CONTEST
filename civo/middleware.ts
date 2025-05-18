@@ -108,7 +108,14 @@ export async function middleware(req: NextRequest) {
 /* ───────── 매처 ───────── */
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpe?g|gif|webp)$).*)",
-    ...PROTECTED.map((p) => `${p}/:path*`),
+    // 정적 파일 제외용 정규식
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpe?g|gif|webp)$).*)',
+
+    // 보호 경로: 값 ‘그대로’ 나열
+    '/home/:path*',
+    '/report/:path*',
+    '/news/:path*',
+    '/my/:path*',
   ],
 };
+
