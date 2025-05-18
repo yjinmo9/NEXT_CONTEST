@@ -1,77 +1,114 @@
+// middleware.ts
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtDecode } from "jwt-decode";
 
-type DecodedUser = {
-  sub: string;
-  email?: string;
-  exp?: number;
-};
+/* ───────── 유틸 ───────── */
 
-export async function middleware(request: NextRequest) {
-  const response = NextResponse.next();
+/* -------- 1. 쿠키 => base64 -------- */
+function getSupabaseBase64(header = ""): string | null {
+  const cookies = header.split(/;\s*/);
 
-  const cookieHeader = request.headers.get("cookie") || "";
-  const token = cookieHeader
-    .split(";")
-    .find((c) => c.trim().startsWith("sb-"))?.split("=")[1];
+  /* ① split JWT(.0 / .1 / .2) */
+  const frags = cookies
+    .filter((c) => c.includes("auth-token."))
+    .map((c) => c.split("="))
+    .sort(
+      (a, b) =>
+        Number(a[0].match(/\.([0-9]+)$/)?.[1] ?? 0) -
+        Number(b[0].match(/\.([0-9]+)$/)?.[1] ?? 0),
+    )
+    .map(([, v]) => decodeURIComponent(v));
 
-  let session: DecodedUser | null = null;
-
-  try {
-    if (token?.startsWith("base64-")) {
-      const raw = token.replace("base64-", "");
-      const decoded = atob(raw);
-      //console.log("📦 base64 디코딩 결과:", decoded);
-  
-      const parsed = JSON.parse(decoded);
-      const jwt = parsed.access_token;
-  
-      if (jwt && jwt.split(".").length === 3) {
-        session = jwtDecode(jwt);
-        //console.log("✅ JWT 디코딩 성공:", session);
-      } else {
-        //console.warn("⚠️ access_token이 유효한 JWT 형식이 아님:", jwt);
-      }
-    } else {
-      //console.warn("⚠️ base64- 접두사가 없는 토큰이거나 없음:", token);
-    }
-  } catch (error) {
-    //console.warn("❌ JWT 디코딩 실패:", error);
-  }
-  
-
-  //console.log("🧠 세션:", session);
-
-  // 세션 정보 있으면 response 헤더에 담기
-  if (session?.sub) {
-    response.headers.set("x-user-id", session.sub);
-    if (session.email) {
-      response.headers.set("x-user-email", session.email);
-    }
+  if (frags.length) {
+    let joined = frags.join("");
+    if (joined.startsWith("base64-")) joined = joined.slice(7);
+    return joined; // ← 순수 base64
   }
 
-  // 보호된 경로인지 확인
-  const protectedPaths = ["/home", "/report", "/news", "/my"];
-  const isProtected = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
+  /* ② access-token (base64-JSON) */
+  const access = cookies
+    .find((c) => c.includes("access-token="))
+    ?.split("=")[1];
+  if (access) return decodeURIComponent(access.replace(/^base64-/, ""));
 
-  // 보호된 경로인데 세션 없으면 로그인으로 리디렉션
-  if (isProtected && !session) {
-    const loginUrl = new URL("/sign-in", request.url);
-    loginUrl.searchParams.set("redirectedFrom", request.nextUrl.pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+  /* ③ 단일 auth-token (base64-JSON) */
+  const single = cookies
+    .find(
+      (c) =>
+        c.startsWith("sb-") &&
+        c.includes("auth-token=") &&          // 이름에 .0/.1 없음
+        !c.includes("auth-token.")            // 점 없는 단일 쿠키
+    )
+    ?.split("=")[1];
+  if (single) return decodeURIComponent(single.replace(/^base64-/, ""));
 
-  return response;
+  return null;
 }
 
+function fixUrlSafeBase64(b64: string) {
+  // 1) URL-safe 문자 원위치
+  let fixed = b64.replace(/-/g, "+").replace(/_/g, "/");
+
+  // 2) 패딩 보충
+  const pad = fixed.length % 4;
+  if (pad) fixed += "=".repeat(4 - pad);
+
+  return fixed;
+}
+
+type JwtSession = { sub?: string; email?: string; exp?: number };
+/* -------- 2. base64 → JWT 세션 -------- */
+function decodeJwtFromBase64(b64: string | null) {
+  if (!b64) return null;
+
+  try {
+    const json   = atob(fixUrlSafeBase64(b64));   // ← 수정
+    const parsed = JSON.parse(json);
+
+    if (typeof parsed.access_token === "string")
+      return jwtDecode(parsed.access_token);
+
+  } catch (err) {
+    console.error("❌ decodeJwtFromBase64 error:", err, "\nraw:", b64.slice(0,60));
+  }
+  return null;
+}
+
+/* ───────── 미들웨어 ───────── */
+
+const PROTECTED = ["/home", "/report", "/news", "/my"];
+
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next();
+
+  /* 1) 쿠키 헤더 → Base64 추출 */
+  const rawB64 = getSupabaseBase64(req.headers.get("cookie") ?? "");
+
+  /* 2) 세션 디코드 */
+  let session: JwtSession | null = null;
+  if (rawB64) session = decodeJwtFromBase64(rawB64);
+
+  /* 3) 세션 있으면 헤더 주입 */
+  if (session?.sub) {
+    res.headers.set("x-user-id", session.sub);
+    if (session.email) res.headers.set("x-user-email", session.email);
+  }
+
+  /* 4) 보호 경로 && 세션 없으면 로그인으로 */
+  const needAuth = PROTECTED.some((p) => req.nextUrl.pathname.startsWith(p));
+  if (needAuth && !session) {
+    const login = new URL("/sign-in", req.url);
+    login.searchParams.set("redirectedFrom", req.nextUrl.pathname);
+    return NextResponse.redirect(login);
+  }
+
+  return res;
+}
+
+/* ───────── 매처 ───────── */
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-    "/home/:path*",
-    "/report/:path*",
-    "/news/:path*",
-    "/my/:path*",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpe?g|gif|webp)$).*)",
+    ...PROTECTED.map((p) => `${p}/:path*`),
   ],
 };

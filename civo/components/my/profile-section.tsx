@@ -16,7 +16,7 @@ export async function logout() {
 
 
 export function ProfileSection({ name, profile }: { name?: string, profile?: string }) {
-  const isLoading = !name || !profile;
+  const isLoading = !name ;
 
   if (isLoading) {
     return (
@@ -33,7 +33,7 @@ export function ProfileSection({ name, profile }: { name?: string, profile?: str
       <div className="flex items-center gap-[10px]">
         <div className="relative w-[50px] h-[50px]">
           <Image
-            src={profile || "/img/profile.png"}
+            src={profile || "/img/myPage.png"}
             alt="프로필"
             width={50}
             height={50}
