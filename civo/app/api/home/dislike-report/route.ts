@@ -34,12 +34,25 @@ export async function POST(req: Request) {
   }
 
   // 2. reports 테이블에서 dislikes + 1
+  // 1. 기존 수치 조회
+  const { data: current, error: fetchError } = await supabase
+    .from("reports")
+    .select("dislikes")
+    .eq("id", reportId)
+    .single();
+
+  if (fetchError || !current) {
+    return NextResponse.json({ error: fetchError?.message || "Not found" }, { status: 500 });
+  }
+
+  // 2. +1 해서 업데이트
   const { data, error: updateError } = await supabase
     .from("reports")
-    .update({ dislikes: (prev: any) => prev.dislikes + 1 })
+    .update({ likes: current.dislikes + 1 })
     .eq("id", reportId)
     .select("dislikes")
     .single();
+
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });

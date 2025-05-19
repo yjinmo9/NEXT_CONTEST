@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatToKSTWithTime } from "@/utils/utils";
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
 
 export type Report = {
   id: string;
@@ -29,12 +30,49 @@ type User = {
 };
 
 export default function ClientReportDetail({ id }: { id: string }) {
-  const router = useRouter();
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<User|null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
+  const [likes, setLikes] = useState(0);
+  const [dislikes, setDislikes] = useState(0);
+  const [vote, setVote] = useState<null | 'like' | 'dislike'>(null);
+
+  const handleLike = async () => {
+    if (vote === 'like') {
+      setLikes(likes - 1);
+      setVote(null);
+    } else {
+      setLikes(likes + 1);
+      if (vote === 'dislike') setDislikes(dislikes - 1);
+      setVote('like');
+      await fetch("/api/home/like-report", {
+        method: "POST",
+        body: JSON.stringify({ reportId: id }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+    }
+  };
+
+  const handleDislike = async () => {
+    if (vote === 'dislike') {
+      setDislikes(dislikes - 1);
+      setVote(null);
+    } else {
+      setDislikes(dislikes + 1);
+      if (vote === 'like') setLikes(likes - 1);
+      setVote('dislike');
+      await fetch("/api/home/dislike-report", {
+        method: "POST",
+        body: JSON.stringify({ reportId: id }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+    }
+  };
+  
   useEffect(() => {
     async function fetchReport() {
       try {
@@ -46,6 +84,11 @@ export default function ClientReportDetail({ id }: { id: string }) {
         }
 
         setReport(data);
+        setLikes(data.likes);
+        if (data.alreadyLiked) {
+          setVote('like');
+        }
+
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -63,7 +106,7 @@ export default function ClientReportDetail({ id }: { id: string }) {
       if (!userData) {
         throw new Error("User data not found");
       }
-      setUser(userData?? null);
+      setUser(userData ?? null);
     }
 
     fetchReport();
@@ -83,18 +126,32 @@ export default function ClientReportDetail({ id }: { id: string }) {
         />
       )}
       <div className="flex flex-col px-4">
-      <div className="flex items-center gap-2 mb-4">
-        <img
-          src={user?.profile_image || "/img/mypage.png"}
-          alt="프로필"
-          className="w-[30px] h-[30px] rounded-full object-cover"
-        />
-        <p className="text-sm font-semibold">{user?.name || "익명"}</p>
-      </div>
-      <div className="font-semibold text-[17px]">{report.title}</div>
-      <div className="text-[12px] text-gray-400 mb-2">{formatToKSTWithTime(report.created_at) || "날짜 없음"}</div>
-      <p className="text-[13px] whitespace-pre-wrap">{report.content}</p>
+        <div className="flex items-center gap-2 mb-4">
+          <img
+            src={user?.profile_image || "/img/mypage.png"}
+            alt="프로필"
+            className="w-[30px] h-[30px] rounded-full object-cover"
+          />
+          <p className="text-sm font-semibold">{user?.name || "익명"}</p>
+        </div>
+        <div className="font-semibold text-[17px]">{report.title}</div>
+        <div className="text-[12px] text-gray-400 mb-2">{formatToKSTWithTime(report.created_at) || "날짜 없음"}</div>
+        <p className="text-[13px] whitespace-pre-wrap">{report.content}</p>
+        <div className="flex gap-4 mt-6">
+          <button
+            onClick={handleLike}
+            className={`flex items-center gap-1 text-sm px-3 py-1 rounded-full border ${vote === 'like' ? 'bg-blue-100 border-blue-400 text-blue-600' : 'border-gray-300 text-gray-600'}`}
+          >
+            <ThumbsUp size={16} /> {likes}
+          </button>
+          <button
+            onClick={handleDislike}
+            className={`flex items-center gap-1 text-sm px-3 py-1 rounded-full border ${vote === 'dislike' ? 'bg-red-100 border-red-400 text-red-600' : 'border-gray-300 text-gray-600'}`}
+          >
+            <ThumbsDown size={16} />
+          </button>
+        </div>
       </div>
     </div>
   );
-}
+} 

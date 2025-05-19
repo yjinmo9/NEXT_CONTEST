@@ -33,9 +33,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
+  // 1. 기존 수치 조회
+  const { data: current, error: fetchError } = await supabase
+    .from("reports")
+    .select("likes")
+    .eq("id", reportId)
+    .single();
+
+  if (fetchError || !current) {
+    return NextResponse.json({ error: fetchError?.message || "Not found" }, { status: 500 });
+  }
+
+  // 2. +1 해서 업데이트
   const { data, error: updateError } = await supabase
     .from("reports")
-    .update({ likes: (prev: any) => prev.likes + 1 })
+    .update({ likes: current.likes + 1 })
     .eq("id", reportId)
     .select("likes")
     .single();
